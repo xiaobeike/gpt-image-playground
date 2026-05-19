@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:img.jinlongjiangzhuang.click)",
+      "mcp__tavily-hikari__tavily_extract",
+      "mcp__tavily-hikari__tavily_search",
+      "Bash(gh api *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__tavily-hikari__tavily_crawl",
+      "Bash(gh auth *)",
+      "Bash(open *)"
+    ]
+  }
+}

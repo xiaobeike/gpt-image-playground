@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPT Image Playground</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f5f7;--surface:#fff;--surface2:#fafafa;--surface3:#f0f0f2;
+  --border:#e0e0e3;--border2:#d1d1d6;--text:#1d1d1f;--text2:#86868b;--text3:#aeaeb2;
+  --primary:#10a37f;--primary-hover:#0d8c6d;--primary-light:rgba(16,163,127,.08);--primary-light2:rgba(16,163,127,.14);
+  --danger:#ff3b30;--danger-light:rgba(255,59,48,.08);
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+  --shadow-lg:0 4px 24px rgba(0,0,0,.1);
+  --transition:.2s cubic-bezier(.4,0,.2,1);
+}
+.dark{
+  --bg:#0a0a0a;--surface:#161616;--surface2:#1c1c1e;--surface3:#2c2c2e;
+  --border:#2c2c2e;--border2:#3a3a3c;--text:#f5f5f7;--text2:#98989d;--text3:#636366;
+  --primary:#34c79a;--primary-hover:#4dd9af;--primary-light:rgba(52,199,154,.1);--primary-light2:rgba(52,199,154,.2);
+  --danger:#ff453a;--danger-light:rgba(255,69,58,.12);
+  --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
+  --shadow-lg:0 4px 24px rgba(0,0,0,.4);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--transition),color var(--transition);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ===== Header ===== */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.header-left{display:flex;align-items:center;gap:10px}
+.header h1{font-size:16px;font-weight:700;white-space:nowrap;letter-spacing:-.01em}
+.header h1 span{font-size:12px;color:var(--text2);font-weight:500;margin-left:8px;background:var(--primary-light);color:var(--primary);padding:2px 8px;border-radius:20px;font-size:11px}
+.header-actions{display:flex;align-items:center;gap:4px}
+
+/* ===== Buttons ===== */
+.btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1}
+.btn:hover{border-color:var(--border2);background:var(--surface2)}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(16,163,127,.25)}
+.btn-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover);color:#fff;box-shadow:0 2px 8px rgba(16,163,127,.3)}
+.btn-primary:active{transform:scale(.97);box-shadow:0 1px 2px rgba(16,163,127,.2)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:var(--radius-xs)}
+.btn-danger{border-color:var(--danger);color:var(--danger);background:var(--danger-light)}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-ghost{border:none;background:none;color:var(--text2);padding:6px 8px;border-radius:var(--radius-xs)}
+.btn-ghost:hover{color:var(--text);background:var(--surface3)}
+.btn-ghost:active{background:var(--border)}
+.icon-btn{width:34px;height:34px;padding:0;justify-content:center;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-size:16px;transition:all var(--transition);display:inline-flex;align-items:center}
+.icon-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
+.icon-btn:active{transform:scale(.93)}
+
+/* ===== Main layout ===== */
+.main{display:flex;height:calc(100vh - 52px)}
+.sidebar{width:380px;min-width:340px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;padding:20px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sidebar::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+.content{flex:1;overflow-y:auto;padding:28px;display:flex;flex-direction:column;align-items:center;scrollbar-width:thin}
+
+/* ===== Tabs ===== */
+.tabs{display:flex;gap:2px;background:var(--surface3);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px}
+.tab{flex:1;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-radius:var(--radius-xs);transition:all var(--transition);font-weight:500;text-align:center}
+.tab.active{color:var(--text);background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
+.tab:not(.disabled):hover{color:var(--text)}
+.tab.disabled{opacity:.35;cursor:default;pointer-events:none;font-size:12px}
+
+/* ===== Form groups ===== */
+.form-group{margin-bottom:16px}
+.form-group>label{display:block;font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+.form-group .hint{font-weight:400;color:var(--text3);font-size:11px;text-transform:none;letter-spacing:0;margin-left:4px}
+textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:14px;background:var(--surface2);color:var(--text);resize:vertical;min-height:80px;font-family:inherit;transition:border var(--transition),box-shadow var(--transition);line-height:1.6}
+textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+textarea::placeholder{color:var(--text3)}
+select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;transition:border var(--transition);appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2386868b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+
+/* ===== Option groups ===== */
+.opt-group{display:flex;flex-wrap:wrap;gap:5px}
+.opt-group label{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;gap:3px;color:var(--text2);font-weight:500;margin-bottom:0;background:var(--surface)}
+.opt-group input{display:none}
+.opt-group label:hover{border-color:var(--border2);background:var(--surface2)}
+.opt-group input:checked+span{color:var(--primary)}
+.opt-group label:has(input:checked){border-color:var(--primary);color:var(--primary);background:var(--primary-light);font-weight:600}
+
+/* ===== Toggle ===== */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm)}
+.toggle-row>span{font-size:13px;font-weight:500;color:var(--text)}
+.toggle{width:42px;height:24px;background:var(--border2);border-radius:12px;position:relative;cursor:pointer;transition:background var(--transition);flex-shrink:0}
+.toggle.on{background:var(--primary)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left var(--transition);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.toggle.on::after{left:20px;box-shadow:0 1px 4px rgba(16,163,127,.3)}
+
+/* ===== Number input ===== */
+.num-input{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.num-input button{width:34px;height:34px;border:none;background:none;cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.num-input button:hover{background:var(--primary-light);color:var(--primary)}
+.num-input button:active{background:var(--primary-light2)}
+.num-input input{width:40px;text-align:center;border:none;background:none;color:var(--text);font-size:14px;font-weight:600;padding:6px 0}
+.num-input input:focus{outline:none}
+.num-input input::-webkit-inner-spin-button{display:none}
+
+/* ===== Upload ===== */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all var(--transition);position:relative;background:var(--surface2)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:var(--primary-light)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone p{color:var(--text2);font-size:13px;font-weight:500}
+.upload-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.upload-preview .thumb{width:60px;height:60px;border-radius:var(--radius-xs);overflow:hidden;position:relative;border:1px solid var(--border);cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow)}
+.upload-preview .thumb:hover{border-color:var(--primary);transform:scale(1.05)}
+.upload-preview .thumb img{width:100%;height:100%;object-fit:cover}
+.upload-preview .thumb .remove{position:absolute;top:3px;right:3px;width:18px;height:18px;background:var(--danger);color:#fff;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;opacity:0;transition:opacity .15s;font-weight:700}
+.upload-preview .thumb:hover .remove{opacity:1}
+
+/* ===== Result area ===== */
+.result-area{width:100%;max-width:800px}
+.result-placeholder{width:100%;min-height:320px;background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);font-size:14px;gap:12px}
+.result-placeholder svg{width:48px;height:48px;opacity:.2}
+.result-images{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);max-width:100%;transition:box-shadow var(--transition)}
+.result-card:hover{box-shadow:var(--shadow-lg)}
+.result-card img{max-width:100%;max-height:600px;display:block;cursor:zoom-in}
+.result-card .actions{padding:10px 12px;display:flex;gap:8px;justify-content:center;border-top:1px solid var(--border);background:var(--surface2)}
+
+/* ===== History ===== */
+.history-section{margin-top:32px;width:100%;max-width:800px}
+.history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.history-header h3{font-size:13px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.history-grid{display:flex;flex-wrap:wrap;gap:8px}
+.history-item{width:60px;height:60px;border-radius:var(--radius-xs);overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all var(--transition);position:relative;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.history-item:hover{border-color:var(--primary);transform:scale(1.08)}
+.history-item img{width:100%;height:100%;object-fit:cover}
+
+/* ===== Loading ===== */
+.loading{display:none;flex-direction:column;align-items:center;gap:16px;padding:48px}
+.loading.show{display:flex}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--text2);font-weight:500}
+
+/* ===== Stream preview ===== */
+.stream-preview{display:none;max-width:512px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin:0 auto;box-shadow:var(--shadow)}
+.stream-preview.show{display:block}
+.stream-preview img{width:100%;display:block;image-rendering:auto}
+
+/* ===== Modal ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:16px;padding:28px;width:420px;max-width:90vw;box-shadow:var(--shadow-lg);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:none}}
+.modal h2{font-size:17px;margin-bottom:20px;font-weight:700;letter-spacing:-.01em}
+.modal .form-group{margin-bottom:16px}
+.modal .form-group>label{margin-bottom:6px}
+.modal input[type=text],.modal input[type=password],.modal input[type=url]{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:var(--surface2);color:var(--text);transition:border var(--transition),box-shadow var(--transition)}
+.modal input[type=text]:focus,.modal input[type=password]:focus,.modal input[type=url]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.modal input::placeholder{color:var(--text3)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:24px}
+
+/* ===== Lightbox ===== */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;align-items:center;justify-content:center;cursor:zoom-out;animation:fadeIn .2s ease}
+.lightbox.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lightbox img{max-width:95vw;max-height:92vh;object-fit:contain;border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,.5);animation:zoomIn .25s ease}
+@keyframes zoomIn{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.lightbox-close{position:fixed;top:16px;right:16px;color:rgba(255,255,255,.8);font-size:22px;cursor:pointer;z-index:301;background:rgba(255,255,255,.12);width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);transition:all .15s;font-weight:300}
+.lightbox-close:hover{background:rgba(255,255,255,.2);color:#fff}
+.lightbox-actions{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:301}
+.lightbox-actions .btn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:500}
+.lightbox-actions .btn:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.25)}
+
+/* ===== Mask canvas ===== */
+.mask-container{position:relative;display:none;margin-top:10px}
+.mask-container.show{display:block}
+.mask-container canvas{border:1px solid var(--border);border-radius:var(--radius-sm);cursor:crosshair;max-width:100%}
+.mask-toolbar{display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
+.mask-toolbar input[type=range]{width:80px;accent-color:var(--primary)}
+
+/* ===== Toast ===== */
+.toast{position:fixed;top:62px;right:20px;padding:12px 20px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-lg);font-size:13px;z-index:400;transform:translateX(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);font-weight:500;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.toast.show{transform:translateX(0)}
+.toast.error{border-color:var(--danger);color:var(--danger);background:var(--danger-light)}
+.toast.success{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+
+/* ===== Progress ===== */
+.progress-bar{width:100%;max-width:512px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:8px auto}
+.progress-bar .fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-hover));border-radius:2px;transition:width .4s ease;width:0%}
+
+/* ===== Generate button special ===== */
+.generate-btn{width:100%;padding:12px;font-size:14px;font-weight:600;margin-top:8px;border-radius:var(--radius-sm);justify-content:center;letter-spacing:.02em}
+
+/* ===== Section divider ===== */
+.section-divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ===== Custom size inputs ===== */
+.custom-size-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.custom-size-row input{width:80px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2);color:var(--text);font-size:13px;transition:border var(--transition),box-shadow var(--transition)}
+.custom-size-row input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.custom-size-row input::placeholder{color:var(--text3)}
+.custom-size-row span{color:var(--text3);font-size:14px}
+
+/* ===== Config presets ===== */
+.preset-row{display:flex;gap:6px;margin-bottom:12px}
+.preset-row select{flex:1}
+.preset-btn{width:34px;height:34px;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2);transition:all var(--transition);flex-shrink:0}
+.preset-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.preset-btn.danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-light)}
+
+/* ===== Test connection ===== */
+.test-result{font-size:12px;margin-top:8px;padding:8px 12px;border-radius:var(--radius-xs);display:none}
+.test-result.show{display:flex;align-items:center;gap:6px}
+.test-result.ok{background:var(--primary-light);color:var(--primary)}
+.test-result.fail{background:var(--danger-light);color:var(--danger)}
+
+/* ===== Prompt history ===== */
+.prompt-history-wrap{position:relative}
+.prompt-history-btn{position:absolute;right:8px;top:8px;width:24px;height:24px;border-radius:6px;border:none;background:var(--surface3);cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;z-index:1}
+.prompt-history-btn:hover{background:var(--primary-light);color:var(--primary)}
+.prompt-history-wrap textarea{padding-right:36px}
+.prompt-history-drop{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:10;max-height:200px;overflow-y:auto;display:none;margin-top:4px}
+.prompt-history-drop.show{display:block}
+.prompt-history-item{padding:8px 12px;cursor:pointer;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);transition:background .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prompt-history-item:last-child{border-bottom:none}
+.prompt-history-item:hover{background:var(--primary-light);color:var(--primary)}
+
+/* ===== Image info badge ===== */
+.img-info{display:flex;flex-wrap:wrap;gap:4px;padding:4px 8px;border-top:1px solid var(--border);background:var(--surface3)}
+.img-info span{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+
+/* ===== Templates ===== */
+.tpl-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;cursor:pointer;transition:all var(--transition)}
+.tpl-card:hover{border-color:var(--primary);background:var(--primary-light)}
+.tpl-card h4{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.tpl-card p{font-size:11px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tpl-card .tpl-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.tpl-card .tpl-tag{font-size:10px;padding:1px 6px;border-radius:3px;background:var(--primary-light);color:var(--primary);font-weight:500}
+
+/* ===== Responsive ===== */
+@media(max-width:900px){
+  .main{flex-direction:column}
+  .sidebar{width:100%;min-width:0;max-height:50vh;border-right:none;border-bottom:1px solid var(--border)}
+  .content{padding:16px}
+  .header h1 span{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <h1>GPT Image Playground<span>图片工坊</span></h1>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="toggleLang()" id="langBtn" title="Language">EN</button>
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button class="btn btn-sm" onclick="showConfig()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span data-i18n="config">配置接口</span>
+    </button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate">生成图片</div>
+      <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit">编辑图片</div>
+      <div class="tab" onclick="switchTab('templates')" id="tab-templates">模板</div>
+    </div>
+
+    <!-- ===== Generate Panel ===== -->
+    <div id="panel-generate">
+      <div class="form-group">
+        <label data-i18n="model">模型</label>
+        <select id="gen-model">
+          <option value="gpt-image-2">gpt-image-2</option>
+          <option value="gpt-image-1">gpt-image-1</option>
+        </select>
+      </div>
+
+      <div class="toggle-row">
+        <span data-i18n="stream">启用流式预览</span>
+        <div class="toggle" id="gen-stream-toggle" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="toggle-row">
+        <span>中文自动翻译</span>
+        <div class="toggle on" id="gen-translate-toggle" onclick="toggleSwitch(this)"></div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="prompt">提示词</label>
+        <div class="prompt-history-wrap">
+          <textarea id="gen-prompt" placeholder="直接输入中文，自动翻译为英文生成更佳效果..." data-i18n-ph="prompt_ph_gen"></textarea>
+          <button class="prompt-history-btn" onclick="togglePromptHistory('gen')" title="Prompt History">⏱</button>
+          <div class="prompt-history-drop" id="gen-prompt-history"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="quantity">图片数量</label>
+        <div class="num-input">
+          <button onclick="changeNum('gen-qty',-1)">−</button>
+          <input type="number" id="gen-qty" value="1" min="1" max="10">
+          <button onclick="changeNum('gen-qty',1)">+</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="size">尺寸</label>
+        <div class="opt-group" id="gen-size-group">
+          <label><input type="radio" name="gen-size" value="auto" checked><span>Auto</span></label>
+          <label><input type="radio" name="gen-size" value="1024x1024"><span>1:1</span></label>
+          <label><input type="radio" name="gen-size" value="1536x1024"><span>3:2</span></label>
+          <label><input type="radio" name="gen-size" value="1024x1536"><span>2:3</span></label>
+          <label><input type="radio" name="gen-size" value="custom"><span data-i18n="custom">自定义</span></label>
+        </div>
+        <div id="gen-custom-size" style="display:none">
+          <div class="custom-size-row">
+            <input type="number" id="gen-w" placeholder="宽" min="256" max="4096">
+            <span>×</span>
+            <input type="number" id="gen-h" placeholder="高" min="256" max="4096">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="form-group">
+        <label data-i18n="quality">质量</label>
+        <div class="opt-group">
+          <label><input type="radio" name="gen-quality" value="auto" checked><span>Auto</span></label>
+          <label><input type="radio" name="gen-quality" value="low"><span>Low (1K)</span></label>
+          <label><input type="radio" name="gen-quality" value="medium"><span>Medium (2K)</span></label>
+          <label><input type="radio" name="gen-quality" value="high"><span>High (4K)</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="upscale">本地放大</label>
+        <div class="opt-group">
+          <label><input type="radio" name="gen-upscale" value="1" checked><span data-i18n="original">原图</span></label>
+          <label><input type="radio" name="gen-upscale" value="2"><span>2K</span></label>
+          <label><input type="radio" name="gen-upscale" value="4"><span>4K</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="format">输出格式</label>
+        <div class="opt-group">
+          <label><input type="radio" name="gen-format" value="png" checked><span>PNG</span></label>
+          <label><input type="radio" name="gen-format" value="jpeg"><span>JPEG</span></label>
+          <label><input type="radio" name="gen-format" value="webp"><span>WebP</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="moderation">审核级别</label>
+        <div class="opt-group">
+          <label><input type="radio" name="gen-moderation" value="auto" checked><span>Auto</span></label>
+          <label><input type="radio" name="gen-moderation" value="low"><span>Low</span></label>
+        </div>
+      </div>
+
+      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn">生成</button>
+    </div>
+
+    <!-- ===== Edit Panel ===== -->
+    <div id="panel-edit" style="display:none">
+      <div class="form-group">
+        <label data-i18n="model">模型</label>
+        <select id="edit-model">
+          <option value="gpt-image-2">gpt-image-2</option>
+          <option value="gpt-image-1">gpt-image-1</option>
+        </select>
+      </div>
+
+      <div class="toggle-row">
+        <span data-i18n="stream">启用流式预览</span>
+        <div class="toggle" id="edit-stream-toggle" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="toggle-row">
+        <span>中文自动翻译</span>
+        <div class="toggle on" id="edit-translate-toggle" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="prompt">提示词</label>
+        <div class="prompt-history-wrap">
+          <textarea id="edit-prompt" placeholder="直接输入中文，自动翻译为英文生成更佳效果..." data-i18n-ph="prompt_ph_edit"></textarea>
+          <button class="prompt-history-btn" onclick="togglePromptHistory('edit')" title="Prompt History">⏱</button>
+          <div class="prompt-history-drop" id="edit-prompt-history"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="source_image">源图片 <span class="hint">(最多10张)</span></label>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" accept="image/*" multiple id="file-input" onchange="handleUpload(event)">
+          <p data-i18n="upload_hint">点击或拖拽上传图片</p>
+        </div>
+        <div class="upload-preview" id="upload-preview"></div>
+      </div>
+
+      <div class="form-group">
+        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask">创建蒙版</button>
+        <div class="mask-container" id="mask-container">
+          <div class="mask-toolbar">
+            <span style="font-size:12px;color:var(--text2)" data-i18n="brush_size">画笔</span>
+            <input type="range" id="brush-size" min="5" max="80" value="25">
+            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear">清除</button>
+            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo">撤销</button>
+          </div>
+          <canvas id="mask-canvas" width="512" height="512"></canvas>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="form-group">
+        <label data-i18n="size">尺寸</label>
+        <div class="opt-group">
+          <label><input type="radio" name="edit-size" value="auto" checked><span>Auto</span></label>
+          <label><input type="radio" name="edit-size" value="1024x1024"><span>1:1</span></label>
+          <label><input type="radio" name="edit-size" value="1536x1024"><span>3:2</span></label>
+          <label><input type="radio" name="edit-size" value="1024x1536"><span>2:3</span></label>
+          <label><input type="radio" name="edit-size" value="custom"><span data-i18n="custom">自定义</span></label>
+        </div>
+        <div id="edit-custom-size" style="display:none">
+          <div class="custom-size-row">
+            <input type="number" id="edit-w" placeholder="宽" min="256" max="4096">
+            <span>×</span>
+            <input type="number" id="edit-h" placeholder="高" min="256" max="4096">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="quality">质量</label>
+        <div class="opt-group">
+          <label><input type="radio" name="edit-quality" value="auto" checked><span>Auto</span></label>
+          <label><input type="radio" name="edit-quality" value="low"><span>Low</span></label>
+          <label><input type="radio" name="edit-quality" value="medium"><span>Medium</span></label>
+          <label><input type="radio" name="edit-quality" value="high"><span>High</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="upscale">本地放大</label>
+        <div class="opt-group">
+          <label><input type="radio" name="edit-upscale" value="1" checked><span data-i18n="original">原图</span></label>
+          <label><input type="radio" name="edit-upscale" value="2"><span>2K</span></label>
+          <label><input type="radio" name="edit-upscale" value="4"><span>4K</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="format">输出格式</label>
+        <div class="opt-group">
+          <label><input type="radio" name="edit-format" value="png" checked><span>PNG</span></label>
+          <label><input type="radio" name="edit-format" value="jpeg"><span>JPEG</span></label>
+          <label><input type="radio" name="edit-format" value="webp"><span>WebP</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="moderation">审核级别</label>
+        <div class="opt-group">
+          <label><input type="radio" name="edit-moderation" value="auto" checked><span>Auto</span></label>
+          <label><input type="radio" name="edit-moderation" value="low"><span>Low</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="quantity">图片数量</label>
+        <div class="num-input">
+          <button onclick="changeNum('edit-qty',-1)">−</button>
+          <input type="number" id="edit-qty" value="1" min="1" max="10">
+          <button onclick="changeNum('edit-qty',1)">+</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn">编辑图片</button>
+    </div>
+
+    <!-- ===== Templates Panel ===== -->
+    <div id="panel-templates" style="display:none">
+      <div class="form-group">
+        <label>分类</label>
+        <select id="tpl-category" onchange="renderTemplates()"></select>
+      </div>
+      <div id="tpl-list"></div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content">
+    <div class="result-area">
+      <div class="result-placeholder" id="placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span data-i18n="no_result">生成的图片将显示在这里</span>
+      </div>
+      <div class="stream-preview" id="stream-preview">
+        <img id="stream-img" src="" alt="">
+      </div>
+      <div class="progress-bar" id="progress-bar" style="display:none"><div class="fill" id="progress-fill"></div></div>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-text" data-i18n="generating">正在生成...</div>
+      </div>
+      <div class="result-images" id="result-images"></div>
+    </div>
+
+    <div class="history-section" id="history-section" style="display:none">
+      <div class="history-header">
+        <h3 data-i18n="history">历史记录</h3>
+        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all">清除全部</button>
+      </div>
+      <div class="history-grid" id="history-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Config Modal -->
+<div class="modal-overlay" id="config-modal">
+  <div class="modal">
+    <h2 data-i18n="api_config">接口配置</h2>
+    <div class="preset-row">
+      <select id="cfg-preset-select" onchange="loadPreset()"><option value="">-- 选择预设 --</option></select>
+      <button class="preset-btn" onclick="savePreset()" title="保存预设">💾</button>
+      <button class="preset-btn danger" onclick="deletePreset()" title="删除预设">🗑</button>
+    </div>
+    <div class="form-group">
+      <label>Base URL</label>
+      <input type="url" id="cfg-baseurl" placeholder="https://api.openai.com/v1">
+    </div>
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="password" id="cfg-apikey" placeholder="sk-...">
+    </div>
+    <div class="test-result" id="test-result"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="hideConfig()" data-i18n="cancel">取消</button>
+      <button class="btn" onclick="testConnection()" data-i18n="test_conn">测试连接</button>
+      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close">×</div>
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-actions">
+    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download">下载</button>
+    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit">发送到编辑</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== State ====================
+let lang = localStorage.getItem('gpt-img-lang') || 'zh';
+let theme = localStorage.getItem('gpt-img-theme') || 'light';
+let config = JSON.parse(localStorage.getItem('gpt-img-config') || '{}');
+let historyList = [];
+let uploadedFiles = [];
+let currentTab = 'generate';
+let isGenerating = false;
+let currentLightboxSrc = '';
+let maskHistory = [];
+
+// ==================== i18n ====================
+const i18n = {
+  zh: {
+    config:'配置接口', generate:'生成图片', edit:'编辑图片', model:'模型',
+    stream:'启用流式预览', prompt:'提示词', quantity:'图片数量', size:'尺寸',
+    custom:'自定义', quality:'质量', upscale:'本地放大', original:'原图',
+    format:'输出格式', moderation:'审核级别', generate_btn:'生成', edit_btn:'编辑图片',
+    source_image:'源图片', upload_hint:'点击或拖拽上传图片', create_mask:'创建蒙版',
+    brush_size:'画笔', clear:'清除', undo:'撤销', no_result:'生成的图片将显示在这里',
+    generating:'正在生成...', editing:'正在编辑...', history:'历史记录',
+    api_config:'接口配置', cancel:'取消', save:'保存',
+    config_saved:'配置已保存', no_config:'请先配置 Base URL 和 API Key',
+    download:'下载', send_edit:'发送到编辑', mask_created:'蒙版已创建',
+    download_fail:'下载失败', max_images:'最多上传10张图片',
+    generate_error:'生成失败', edit_error:'编辑失败', clear_all:'清除全部',
+    prompt_ph_gen:'描述你想生成的图片...', prompt_ph_edit:'描述你想修改的内容...',
+    enter_prompt:'请输入提示词', upload_image:'请上传源图片',
+    stream_complete:'流式预览完成', no_images:'暂无历史记录',
+    test_conn:'测试连接',
+  },
+  en: {
+    config:'API Config', generate:'Generate', edit:'Edit', model:'Model',
+    stream:'Streaming Preview', prompt:'Prompt', quantity:'Quantity', size:'Size',
+    custom:'Custom', quality:'Quality', upscale:'Local Upscale', original:'Original',
+    format:'Format', moderation:'Moderation', generate_btn:'Generate', edit_btn:'Edit Image',
+    source_image:'Source Images', upload_hint:'Click or drag to upload', create_mask:'Create Mask',
+    brush_size:'Brush', clear:'Clear', undo:'Undo', no_result:'Generated images will appear here',
+    generating:'Generating...', editing:'Editing...', history:'History',
+    api_config:'API Configuration', cancel:'Cancel', save:'Save',
+    config_saved:'Config saved', no_config:'Please configure Base URL and API Key first',
+    download:'Download', send_edit:'Send to Edit', mask_created:'Mask created',
+    download_fail:'Download failed', max_images:'Max 10 images',
+    generate_error:'Generation failed', edit_error:'Edit failed', clear_all:'Clear All',
+    prompt_ph_gen:'Describe the image you want to generate...', prompt_ph_edit:'Describe the changes you want...',
+    enter_prompt:'Please enter a prompt', upload_image:'Please upload a source image',
+    stream_complete:'Stream preview complete', no_images:'No history yet',
+    test_conn:'Test Connection',
+  }
+};
+function t(k){return i18n[lang]?.[k]||k}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(el.tagName==='INPUT')el.placeholder=t(k);
+    else el.textContent=t(k);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    el.placeholder=t(el.getAttribute('data-i18n-ph'));
+  });
+  document.getElementById('langBtn').textContent=lang==='zh'?'EN':'中';
+}
+
+// ==================== Init ====================
+function init(){
+  if(theme==='dark')document.body.classList.add('dark');
+  document.getElementById('cfg-baseurl').value=config.baseUrl||'';
+  document.getElementById('cfg-apikey').value=config.apiKey||'';
+  applyI18n();
+  setupSizeListeners('gen');
+  setupSizeListeners('edit');
+  initMaskCanvas();
+  initDragDrop();
+  loadHistoryFromStorage();
+  renderHistory();
+  initTemplates();
+  if(!config.baseUrl||!config.apiKey){
+    setTimeout(()=>showConfig(),400);
+  }
+}
+
+function setupSizeListeners(prefix){
+  document.querySelectorAll(`input[name="${prefix}-size"]`).forEach(r=>{
+    r.addEventListener('change',()=>{
+      const customDiv=document.getElementById(`${prefix}-custom-size`);
+      if(customDiv) customDiv.style.display=r.value==='custom'?'block':'none';
+    });
+  });
+}
+
+// ==================== Theme ====================
+function toggleTheme(){
+  theme=theme==='light'?'dark':'light';
+  document.body.classList.toggle('dark');
+  const icon=document.getElementById('theme-icon');
+  if(theme==='dark'){
+    icon.innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }else{
+    icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  }
+  localStorage.setItem('gpt-img-theme',theme);
+}
+
+// ==================== Language ====================
+function toggleLang(){
+  lang=lang==='zh'?'en':'zh';
+  localStorage.setItem('gpt-img-lang',lang);
+  applyI18n();
+}
+
+// ==================== Tabs ====================
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab:not(.disabled)').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('panel-generate').style.display=tab==='generate'?'block':'none';
+  document.getElementById('panel-edit').style.display=tab==='edit'?'block':'none';
+  document.getElementById('panel-templates').style.display=tab==='templates'?'block':'none';
+}
+
+// ==================== Toggle Switch ====================
+function toggleSwitch(el){el.classList.toggle('on')}
+
+// ==================== Number Input ====================
+function changeNum(id,delta){
+  const inp=document.getElementById(id);
+  let v=parseInt(inp.value)||1;
+  v=Math.max(1,Math.min(10,v+delta));
+  inp.value=v;
+}
+
+// ==================== Config ====================
+function showConfig(){
+  document.getElementById('cfg-baseurl').value=config.baseUrl||'';
+  document.getElementById('cfg-apikey').value=config.apiKey||'';
+  document.getElementById('test-result').className='test-result';
+  renderPresetDropdown();
+  document.getElementById('config-modal').classList.add('show');
+}
+function hideConfig(){document.getElementById('config-modal').classList.remove('show')}
+function saveConfig(){
+  config.baseUrl=document.getElementById('cfg-baseurl').value.trim().replace(/\/+$/,'');
+  config.apiKey=document.getElementById('cfg-apikey').value.trim();
+  localStorage.setItem('gpt-img-config',JSON.stringify(config));
+  hideConfig();
+  showToast(t('config_saved'),'success');
+}
+
+// ==================== Toast ====================
+function showToast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast'+(type?' '+type:'')+' show';
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ==================== File Upload ====================
+function handleUpload(e){
+  const files=Array.from(e.target.files);
+  if(uploadedFiles.length+files.length>10){
+    showToast(t('max_images'),'error');return;
+  }
+  files.forEach(f=>{
+    if(uploadedFiles.length>=10)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      uploadedFiles.push({name:f.name,data:ev.target.result,file:f});
+      renderUploadPreview();
+    };
+    reader.readAsDataURL(f);
+  });
+  e.target.value='';
+}
+function renderUploadPreview(){
+  const c=document.getElementById('upload-preview');
+  c.innerHTML=uploadedFiles.map((f,i)=>
+    `<div class="thumb" onclick="viewUploadThumb(${i})"><img src="${f.data}"><div class="remove" onclick="event.stopPropagation();removeUpload(${i})">×</div></div>`
+  ).join('');
+}
+function removeUpload(i){uploadedFiles.splice(i,1);renderUploadPreview()}
+function viewUploadThumb(i){openLightbox(uploadedFiles[i].data)}
+function initDragDrop(){
+  const z=document.getElementById('upload-zone');
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('dragover')});
+  z.addEventListener('dragleave',()=>z.classList.remove('dragover'));
+  z.addEventListener('drop',e=>{
+    e.preventDefault();z.classList.remove('dragover');
+    const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+    handleUpload({target:{files}});
+  });
+}
+
+// ==================== Mask Canvas ====================
+let maskDrawing=false;
+function initMaskCanvas(){
+  const canvas=document.getElementById('mask-canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#000';ctx.fillRect(0,0,512,512);
+  saveMaskState();
+  canvas.addEventListener('mousedown',e=>{maskDrawing=true;drawMask(e)});
+  canvas.addEventListener('mousemove',e=>{if(maskDrawing)drawMask(e)});
+  canvas.addEventListener('mouseup',()=>{if(maskDrawing){maskDrawing=false;saveMaskState()}});
+  canvas.addEventListener('mouseleave',()=>{if(maskDrawing){maskDrawing=false;saveMaskState()}});
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();maskDrawing=true;drawMaskTouch(e)},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(maskDrawing)drawMaskTouch(e)},{passive:false});
+  canvas.addEventListener('touchend',()=>{if(maskDrawing){maskDrawing=false;saveMaskState()}});
+}
+function drawMask(e){
+  const canvas=document.getElementById('mask-canvas');
+  const ctx=canvas.getContext('2d');
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=canvas.width/rect.width;
+  const scaleY=canvas.height/rect.height;
+  const x=(e.clientX-rect.left)*scaleX;
+  const y=(e.clientY-rect.top)*scaleY;
+  const size=parseInt(document.getElementById('brush-size').value);
+  ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath();ctx.arc(x,y,size/2,0,Math.PI*2);ctx.fill();
+}
+function drawMaskTouch(e){
+  const touch=e.touches[0];
+  drawMask({clientX:touch.clientX,clientY:touch.clientY});
+}
+function clearMask(){
+  const canvas=document.getElementById('mask-canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
+  saveMaskState();
+}
+function saveMaskState(){
+  const canvas=document.getElementById('mask-canvas');
+  const ctx=canvas.getContext('2d');
+  maskHistory.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+  if(maskHistory.length>30)maskHistory.shift();
+}
+function undoMask(){
+  if(maskHistory.length<=1)return;
+  maskHistory.pop();
+  const canvas=document.getElementById('mask-canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.putImageData(maskHistory[maskHistory.length-1],0,0);
+}
+function toggleMask(){
+  const c=document.getElementById('mask-container');
+  c.classList.toggle('show');
+  if(c.classList.contains('show')&&uploadedFiles.length>0){
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.getElementById('mask-canvas');
+      const ctx=canvas.getContext('2d');
+      canvas.width=img.width;canvas.height=img.height;
+      ctx.drawImage(img,0,0);
+      ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,img.width,img.height);
+      maskHistory=[];
+      saveMaskState();
+    };
+    img.src=uploadedFiles[0].data;
+  }
+}
+function getMaskBase64(){
+  const canvas=document.getElementById('mask-canvas');
+  const tmp=document.createElement('canvas');
+  tmp.width=canvas.width;tmp.height=canvas.height;
+  const ctx=tmp.getContext('2d');
+  const srcCtx=canvas.getContext('2d');
+  const imgData=srcCtx.getImageData(0,0,canvas.width,canvas.height);
+  const outData=ctx.createImageData(canvas.width,canvas.height);
+  for(let i=0;i<imgData.data.length;i+=4){
+    const a=imgData.data[i+3];
+    const v=a>128?0:255;
+    outData.data[i]=v;outData.data[i+1]=v;outData.data[i+2]=v;outData.data[i+3]=255;
+  }
+  ctx.putImageData(outData,0,0);
+  return tmp.toDataURL('image/png').split(',')[1];
+}
+
+// ==================== API Helpers ====================
+function getHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+config.apiKey};
+}
+function getRadio(name){
+  return document.querySelector('input[name="'+name+'"]:checked')?.value;
+}
+function getSizeStr(prefix){
+  const v=getRadio(prefix+'-size');
+  if(v==='custom'){
+    const w=document.getElementById(prefix+'-w')?.value;
+    const h=document.getElementById(prefix+'-h')?.value;
+    return w&&h?w+'x'+h:'1024x1024';
+  }
+  return v;
+}
+
+// ==================== Auto Translate ====================
+function hasChinese(str){return /[一-鿿]/.test(str)}
+async function translatePrompt(text){
+  if(!hasChinese(text))return text;
+  try{
+    const models=['gpt-4o-mini','gpt-4o','gpt-4','gpt-3.5-turbo'];
+    let lastErr;
+    for(const m of models){
+      try{
+        const resp=await fetch(config.baseUrl+'/chat/completions',{
+          method:'POST',
+          headers:getHeaders(),
+          body:JSON.stringify({
+            model:m,
+            messages:[{role:'system',content:'You are a prompt translator for AI image generation. Translate the user\'s Chinese text into an English prompt optimized for image generation. If the input is a short description, expand it into a detailed, vivid prompt with style, lighting, composition details. Output ONLY the English prompt, nothing else.'},{role:'user',content:text}],
+            max_tokens:500,
+            temperature:0.3
+          })
+        });
+        if(!resp.ok){lastErr=resp.status;continue}
+        const json=await resp.json();
+        const translated=json.choices?.[0]?.message?.content?.trim();
+        if(translated)return translated;
+      }catch(e){lastErr=e}
+    }
+    return text;
+  }catch(e){
+    console.warn('Translate failed, using original:',e);
+    return text;
+  }
+}
+
+// ==================== Local Upscale ====================
+function upscaleImage(imgSrc,factor){
+  return new Promise(resolve=>{
+    if(factor<=1){resolve(imgSrc);return}
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const maxPx=factor===2?2048:4096;
+      let w=img.width,h=img.height;
+      const ratio=Math.min(maxPx/w,maxPx/h,4);
+      if(ratio<=1){resolve(imgSrc);return}
+      canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio);
+      const ctx=canvas.getContext('2d');
+      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror=()=>resolve(imgSrc);
+    img.src=imgSrc;
+  });
+}
+
+// ==================== Convert format ====================
+function convertFormat(imgSrc,fmt){
+  return new Promise(resolve=>{
+    if(fmt==='png'){resolve(imgSrc);return}
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      c.width=img.width;c.height=img.height;
+      c.getContext('2d').drawImage(img,0,0);
+      resolve(c.toDataURL('image/'+fmt,0.92));
+    };
+    img.onerror=()=>resolve(imgSrc);
+    img.src=imgSrc;
+  });
+}
+
+// ==================== IndexedDB History ====================
+let idb=null;
+function openIDB(){
+  return new Promise((resolve,reject)=>{
+    if(idb){resolve(idb);return}
+    const req=indexedDB.open('gptImgHistory',1);
+    req.onupgradeneeded=e=>{e.target.result.createObjectStore('images',{keyPath:'id'})};
+    req.onsuccess=e=>{idb=e.target.result;resolve(idb)};
+    req.onerror=e=>reject(e);
+  });
+}
+async function saveFullImage(id,dataUrl){
+  try{
+    const db=await openIDB();
+    const blob=await (await fetch(dataUrl)).blob();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction('images','readwrite');
+      tx.objectStore('images').put({id,blob});
+      tx.oncomplete=resolve;tx.onerror=reject;
+    });
+  }catch(e){console.warn('IDB save failed:',e)}
+}
+async function getFullImage(id){
+  try{
+    const db=await openIDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction('images','readonly');
+      const req=tx.objectStore('images').get(id);
+      req.onsuccess=()=>{
+        if(req.result&&req.result.blob){
+          const r=new FileReader();
+          r.onload=()=>resolve(r.result);
+          r.onerror=()=>resolve(null);
+          r.readAsDataURL(req.result.blob);
+        }else resolve(null);
+      };
+      req.onerror=()=>resolve(null);
+    });
+  }catch(e){return null}
+}
+async function clearIDB(){
+  try{
+    const db=await openIDB();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction('images','readwrite');
+      tx.objectStore('images').clear();
+      tx.oncomplete=resolve;tx.onerror=reject;
+    });
+  }catch(e){}
+}
+
+function getThumbFromDataUrl(dataUrl,maxSize=80){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      const ratio=Math.min(maxSize/img.width,maxSize/img.height,1);
+      c.width=Math.round(img.width*ratio);c.height=Math.round(img.height*ratio);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      resolve(c.toDataURL('image/jpeg',0.6));
+    };
+    img.onerror=()=>resolve('');
+    img.src=dataUrl;
+  });
+}
+function loadHistoryFromStorage(){
+  try{
+    const stored=localStorage.getItem('gpt-img-history');
+    if(stored) historyList=JSON.parse(stored);
+    historyList.forEach(h=>{if(!h.id)h.id=null});
+  }catch(e){historyList=[]}
+}
+function saveHistoryToStorage(){
+  try{
+    localStorage.setItem('gpt-img-history',JSON.stringify(historyList));
+  }catch(e){
+    historyList=historyList.slice(0,Math.floor(historyList.length/2));
+    try{localStorage.setItem('gpt-img-history',JSON.stringify(historyList))}catch(e2){}
+  }
+}
+let historyIdCounter=Date.now();
+async function addHistory(dataUrl){
+  const thumb=await getThumbFromDataUrl(dataUrl);
+  const id='img_'+(historyIdCounter++);
+  saveFullImage(id,dataUrl);
+  historyList.unshift({url:thumb,id,time:Date.now()});
+  if(historyList.length>80)historyList=historyList.slice(0,80);
+  saveHistoryToStorage();
+  renderHistory();
+}
+function renderHistory(){
+  const sec=document.getElementById('history-section');
+  const grid=document.getElementById('history-grid');
+  if(historyList.length===0){sec.style.display='none';return}
+  sec.style.display='block';
+  grid.innerHTML=historyList.map((h,i)=>
+    `<div class="history-item" onclick="viewHistory(${i})"><img src="${h.url}" loading="lazy"></div>`
+  ).join('');
+}
+async function viewHistory(i){
+  const h=historyList[i];
+  if(h.id){
+    const full=await getFullImage(h.id);
+    openLightbox(full||h.url);
+  }else{
+    openLightbox(h.url);
+  }
+}
+async function clearHistory(){
+  historyList=[];
+  localStorage.removeItem('gpt-img-history');
+  await clearIDB();
+  renderHistory();
+}
+
+// ==================== Lightbox ====================
+function openLightbox(src){
+  currentLightboxSrc=src;
+  document.getElementById('lightbox-img').src=src;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('show')}
+function downloadLightboxImage(){
+  const a=document.createElement('a');
+  a.href=currentLightboxSrc;
+  a.download='gpt-image-'+Date.now()+'.png';
+  a.click();
+}
+function sendLightboxToEdit(){
+  switchTab('edit');
+  uploadedFiles=[{name:'sent.png',data:currentLightboxSrc,file:null}];
+  renderUploadPreview();
+  closeLightbox();
+}
+
+// ==================== Download ====================
+function downloadResultImage(imgSrc,fmt){
+  const a=document.createElement('a');
+  if(imgSrc.startsWith('data:')){
+    a.href=imgSrc;
+    a.download='gpt-image-'+Date.now()+'.'+fmt;
+    a.click();
+  }else{
+    fetch(imgSrc).then(r=>r.blob()).then(blob=>{
+      a.href=URL.createObjectURL(blob);
+      a.download='gpt-image-'+Date.now()+'.'+fmt;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }).catch(()=>window.open(imgSrc,'_blank'));
+  }
+}
+
+// ==================== Result Card ====================
+function makeResultCard(imgSrc,fmt,info){
+  const badges = info ? `<div class="img-info">${[
+    info.model ? `<span>${info.model}</span>` : '',
+    info.size ? `<span>${info.size}</span>` : '',
+    info.quality && info.quality!=='auto' ? `<span>${info.quality}</span>` : '',
+    info.format ? `<span>${info.format.toUpperCase()}</span>` : ''
+  ].filter(Boolean).join('')}</div>` : '';
+  return `<div class="result-card">
+    <img src="${imgSrc}" onclick="openLightbox(this.src)" loading="lazy">
+    ${badges}
+    <div class="actions">
+      <button class="btn btn-sm" onclick="downloadResultImage(this.closest('.result-card').querySelector('img').src,'${fmt}')">${t('download')}</button>
+      <button class="btn btn-sm" onclick="sendToEdit(this)">${t('send_edit')}</button>
+    </div>
+  </div>`;
+}
+
+// ==================== Send to Edit ====================
+function sendToEdit(btn){
+  const card=btn.closest('.result-card');
+  const imgSrc=card.querySelector('img').src;
+  switchTab('edit');
+  uploadedFiles=[{name:'sent.png',data:imgSrc,file:null}];
+  renderUploadPreview();
+}
+
+// ==================== Loading ====================
+function showLoading(text){
+  isGenerating=true;
+  document.getElementById('loading-text').textContent=text;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('placeholder').style.display='none';
+  document.getElementById('gen-btn').disabled=true;
+  document.getElementById('edit-btn').disabled=true;
+}
+function hideLoading(){
+  isGenerating=false;
+  document.getElementById('loading').classList.remove('show');
+  document.getElementById('progress-bar').style.display='none';
+  document.getElementById('gen-btn').disabled=false;
+  document.getElementById('edit-btn').disabled=false;
+}
+
+// ==================== Stream Preview ====================
+function showStreamPreview(url){
+  document.getElementById('stream-img').src=url;
+  document.getElementById('stream-preview').classList.add('show');
+}
+function hideStreamPreview(){document.getElementById('stream-preview').classList.remove('show')}
+
+// ==================== Progress ====================
+function showProgress(pct){
+  document.getElementById('progress-bar').style.display='block';
+  document.getElementById('progress-fill').style.width=pct+'%';
+}
+
+// ==================== Process Results ====================
+async function processResults(json,fmt,upscaleFactor,info){
+  const resultsDiv=document.getElementById('result-images');
+  if(!json?.data||json.data.length===0){
+    throw new Error('No images in response');
+  }
+  for(const item of json.data){
+    let imgSrc;
+    if(item.b64_json) imgSrc='data:image/png;base64,'+item.b64_json;
+    else if(item.url) imgSrc=item.url;
+    else continue;
+    if(upscaleFactor>1) imgSrc=await upscaleImage(imgSrc,upscaleFactor);
+    imgSrc=await convertFormat(imgSrc,fmt);
+    resultsDiv.innerHTML+=makeResultCard(imgSrc,fmt,info);
+    addHistory(imgSrc);
+  }
+}
+
+// ==================== Generate Image ====================
+async function generateImage(){
+  if(isGenerating)return;
+  if(!config.baseUrl||!config.apiKey){showToast(t('no_config'),'error');showConfig();return}
+
+  const model=document.getElementById('gen-model').value;
+  const rawPrompt=document.getElementById('gen-prompt').value.trim();
+  if(!rawPrompt){showToast(t('enter_prompt'),'error');return}
+  addPromptToHistory(rawPrompt);
+  const translateOn=document.getElementById('gen-translate-toggle').classList.contains('on');
+  let prompt=rawPrompt;
+  if(translateOn&&hasChinese(rawPrompt)){
+    showToast(lang==='zh'?'正在翻译提示词...':'Translating prompt...','success');
+    prompt=await translatePrompt(rawPrompt);
+  }
+  const n=parseInt(document.getElementById('gen-qty').value)||1;
+  const size=getSizeStr('gen');
+  const quality=getRadio('gen-quality');
+  const fmt=getRadio('gen-format');
+  const moderation=getRadio('gen-moderation');
+  const upscaleFactor=parseInt(getRadio('gen-upscale'));
+  const streamOn=document.getElementById('gen-stream-toggle').classList.contains('on');
+
+  const body={model,prompt,n};
+  if(size!=='auto') body.size=size;
+  if(model==='gpt-image-1'||model==='gpt-image-2'){
+    if(quality!=='auto') body.quality=quality;
+    if(moderation!=='auto') body.moderation=moderation;
+  }
+  if(!streamOn) body.response_format='b64_json';
+
+  showLoading(t('generating'));
+  document.getElementById('result-images').innerHTML='';
+  showProgress(10);
+
+  const genInfo={model,size:body.size||'auto',quality,format:fmt};
+
+  try{
+    const url=config.baseUrl+'/images/generations';
+    const resp=await fetch(url,{method:'POST',headers:getHeaders(),body:JSON.stringify(body)});
+
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err.error?.message||'HTTP '+resp.status);
+    }
+
+    const contentType=resp.headers.get('content-type')||'';
+
+    if(streamOn && (contentType.includes('text/event-stream')||contentType.includes('application/octet-stream'))){
+      showProgress(30);
+      const reader=resp.body.getReader();
+      const decoder=new TextDecoder();
+      let buffer='';
+      let finalData=null;
+      let partialImage=null;
+
+      while(true){
+        const{done,value}=await reader.read();
+        if(done)break;
+        buffer+=decoder.decode(value,{stream:true});
+        const lines=buffer.split('\n');
+        buffer=lines.pop()||'';
+
+        for(const line of lines){
+          if(!line.startsWith('data:'))continue;
+          const data=line.slice(5).trim();
+          if(data==='[DONE]')continue;
+          try{
+            const parsed=JSON.parse(data);
+            if(parsed.partial_image_b64){
+              partialImage='data:image/png;base64,'+parsed.partial_image_b64;
+              showStreamPreview(partialImage);
+              showProgress(30+Math.min(50,parsed.progress||30));
+            }
+            if(parsed.data) finalData=parsed;
+            if(parsed.b64_json) showStreamPreview('data:image/png;base64,'+parsed.b64_json);
+          }catch(e){}
+        }
+      }
+
+      hideStreamPreview();
+      showProgress(80);
+
+      if(finalData?.data){
+        await processResults(finalData,fmt,upscaleFactor,genInfo);
+      }else if(partialImage){
+        let imgSrc=partialImage;
+        if(upscaleFactor>1) imgSrc=await upscaleImage(imgSrc,upscaleFactor);
+        imgSrc=await convertFormat(imgSrc,fmt);
+        document.getElementById('result-images').innerHTML=makeResultCard(imgSrc,fmt,genInfo);
+        addHistory(imgSrc);
+      }
+    } else {
+      showProgress(60);
+      const json=await resp.json();
+      showProgress(80);
+      await processResults(json,fmt,upscaleFactor,genInfo);
+    }
+
+    showProgress(100);
+    hideStreamPreview();
+    hideLoading();
+  }catch(e){
+    hideLoading();hideStreamPreview();
+    showToast(t('generate_error')+': '+e.message,'error');
+  }
+}
+
+// ==================== Edit Image ====================
+async function editImage(){
+  if(isGenerating)return;
+  if(!config.baseUrl||!config.apiKey){showToast(t('no_config'),'error');showConfig();return}
+  if(uploadedFiles.length===0){showToast(t('upload_image'),'error');return}
+
+  const model=document.getElementById('edit-model').value;
+  const rawPrompt=document.getElementById('edit-prompt').value.trim();
+  if(!rawPrompt){showToast(t('enter_prompt'),'error');return}
+  addPromptToHistory(rawPrompt);
+  const translateOn=document.getElementById('edit-translate-toggle').classList.contains('on');
+  let prompt=rawPrompt;
+  if(translateOn&&hasChinese(rawPrompt)){
+    showToast(lang==='zh'?'正在翻译提示词...':'Translating prompt...','success');
+    prompt=await translatePrompt(rawPrompt);
+  }
+  const n=parseInt(document.getElementById('edit-qty').value)||1;
+  const sizeVal=getSizeStr('edit');
+  const quality=getRadio('edit-quality');
+  const fmt=getRadio('edit-format');
+  const moderation=getRadio('edit-moderation');
+  const upscaleFactor=parseInt(getRadio('edit-upscale'));
+
+  showLoading(t('editing'));
+  document.getElementById('result-images').innerHTML='';
+  showProgress(10);
+
+  const editInfo={model,size:sizeVal!=='auto'?sizeVal:'auto',quality,format:fmt};
+
+  try{
+    const body={model,prompt,n};
+    body.image=uploadedFiles.map(f=>f.data.split(',')[1]);
+    if(sizeVal!=='auto') body.size=sizeVal;
+    if(quality!=='auto') body.quality=quality;
+    if(moderation!=='auto') body.moderation=moderation;
+
+    const maskContainer=document.getElementById('mask-container');
+    if(maskContainer.classList.contains('show')){
+      body.mask=getMaskBase64();
+    }
+
+    showProgress(30);
+    const resp=await fetch(config.baseUrl+'/images/edits',{
+      method:'POST',headers:getHeaders(),body:JSON.stringify(body)
+    });
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err.error?.message||'HTTP '+resp.status);
+    }
+    showProgress(60);
+    const json=await resp.json();
+
+    showProgress(80);
+    await processResults(json,fmt,upscaleFactor,editInfo);
+    showProgress(100);
+    hideLoading();
+  }catch(e){
+    hideLoading();
+    showToast(t('edit_error')+': '+e.message,'error');
+  }
+}
+
+// ==================== Prompt Templates ====================
+const TEMPLATES=[
+  {cat:"人像摄影",name:"专业肖像",tags:["人像","高清"],desc:"专业影棚人像，柔和灯光，浅景深，中性背景",prompt:"Professional headshot portrait of a person, soft studio lighting, shallow depth of field, neutral background, shot on 85mm lens, editorial photography style"},
+  {cat:"人像摄影",name:"电影感人像",tags:["电影","氛围"],desc:"夜晚雨中霓虹灯光人像，电影感氛围",prompt:"Cinematic portrait of a person standing in the rain at night, neon lights reflecting on wet streets, dramatic lighting, moody atmosphere, shot on 35mm film, anamorphic lens flare"},
+  {cat:"人像摄影",name:"自然光人像",tags:["自然","柔和"],desc:"窗边自然光人像，金色夕阳，温暖柔和",prompt:"Natural light portrait of a person by a large window, golden hour sunlight streaming in, soft shadows, warm color temperature, lifestyle photography, relaxed expression"},
+  {cat:"人像摄影",name:"复古胶片人像",tags:["复古","胶片"],desc:"70年代复古胶片风格，温暖褪色色调，柯达质感",prompt:"Vintage 1970s portrait photograph, warm faded tones, film grain, Kodak Portra 400 look, soft focus edges, nostalgic mood, printed on matte photo paper"},
+  {cat:"风景摄影",name:"山脉日出",tags:["风景","壮丽"],desc:"日出时分的雪山全景，金色光芒，山谷薄雾",prompt:"Panoramic mountain landscape at sunrise, golden light hitting snow-capped peaks, mist in the valley below, dramatic clouds, shot on medium format camera, ultra-wide angle"},
+  {cat:"风景摄影",name:"森林光影",tags:["森林","光影"],desc:"古老红杉林，阳光穿透树冠，苔藓地面，丁达尔效应",prompt:"Ancient redwood forest with beams of sunlight streaming through the canopy, moss-covered ground, ferns, god rays filtering through branches, ethereal atmosphere, nature photography"},
+  {cat:"风景摄影",name:"海岸悬崖",tags:["海洋","戏剧性"],desc:"暴风雨中的海岸悬崖，巨浪拍岸，乌云密布",prompt:"Dramatic coastal cliffs with crashing waves below, storm clouds gathering, moody atmosphere, shot from cliff edge, long exposure on water, dark blue and green tones"},
+  {cat:"风景摄影",name:"城市夜景",tags:["城市","夜景"],desc:"暮色中的城市天际线，摩天大楼灯光倒映河面",prompt:"City skyline at twilight, skyscrapers lit up against deep blue sky, reflections in the river below, long exposure light trails on bridges, urban photography, golden hour transitioning to night"},
+  {cat:"产品摄影",name:"高端产品展示",tags:["产品","电商"],desc:"大理石台面上的奢侈品展示，柔和灯光，极简构图",prompt:"Product photography of a luxury skincare bottle on a marble surface, soft studio lighting, clean minimalist composition, subtle reflections, premium feel, 8K detail, commercial advertising style"},
+  {cat:"产品摄影",name:"美食特写",tags:["美食","特写"],desc:"美食特写，热气腾腾，浅景深，木质桌面",prompt:"Close-up food photography of a gourmet dish, steam rising, shallow depth of field, natural styling on a rustic wooden table, professional food photography, warm tones, editorial quality"},
+  {cat:"产品摄影",name:"科技产品",tags:["科技","简约"],desc:"苹果风格的科技产品摄影，白色背景，简约高级",prompt:"Sleek tech product on a clean white surface, Apple-style product photography, soft directional lighting, subtle shadows, minimalist background, high-end commercial feel, 8K detail"},
+  {cat:"产品摄影",name:"生活方式摆拍",tags:["生活","平铺"],desc:"秋日温暖平铺，茶杯书本落叶格纹毯",prompt:"Cozy autumn flat lay with a cup of tea, an open book, dried leaves, and a plaid blanket on a wooden floor, warm natural light, lifestyle photography, editorial style"},
+  {cat:"艺术插画",name:"水彩风格",tags:["水彩","梦幻"],desc:"梦幻水彩画，狐狸坐在蘑菇下，柔和粉彩",prompt:"Whimsical watercolor painting of a fox sitting under a mushroom in a forest, soft pastel colors, children's book illustration style, delicate brushstrokes, dreamy atmosphere"},
+  {cat:"艺术插画",name:"扁平矢量插画",tags:["矢量","简约"],desc:"城市夜景扁平矢量插画，深蓝电蓝色调",prompt:"Flat vector illustration of a city skyline at night, deep navy and electric blue palette, minimalist style, clean geometric shapes, no gradients, modern design"},
+  {cat:"艺术插画",name:"油画风格",tags:["油画","经典"],desc:"水果花卉静物油画，荷兰黄金时代风格，明暗对比",prompt:"Oil painting of a still life with fruit and flowers on a wooden table, rich warm tones, visible brushstrokes, Dutch Golden Age style, dramatic chiaroscuro lighting, museum quality"},
+  {cat:"艺术插画",name:"铅笔素描",tags:["素描","手绘"],desc:"欧洲大教堂精细铅笔素描，交叉排线，米色纸张",prompt:"Detailed pencil sketch of an old European cathedral, fine crosshatching, architectural details, subtle shading, drawn on cream-colored paper, vintage drafting style"},
+  {cat:"动漫风格",name:"吉卜力风格",tags:["吉卜力","治愈"],desc:"吉卜力风格，女孩走过开满野花的翠绿山谷",prompt:"Studio Ghibli style illustration of a girl walking through a lush green valley with wildflowers, warm painterly background, soft lighting, gentle wind blowing, whimsical and peaceful mood"},
+  {cat:"动漫风格",name:"赛博朋克",tags:["赛博朋克","霓虹"],desc:"赛博朋克角色站在雨中天台，霓虹灯反射",prompt:"Cyberpunk anime character standing on a rain-soaked rooftop, neon signs in the background, holographic reflections, dark atmosphere with vibrant pink and blue highlights, detailed anime art style"},
+  {cat:"动漫风格",name:"3D皮克斯风格",tags:["3D","可爱"],desc:"3D皮克斯风格卡通角色，柔软灯光，表情生动",prompt:"3D Pixar-style cartoon character, clean lines, soft lighting, expressive features, polished cinematic render, vibrant colors, friendly and appealing design"},
+  {cat:"动漫风格",name:"日漫角色",tags:["日漫","少年"],desc:"少年漫风格角色，动态战斗姿势，速度线",prompt:"Anime character in shonen style, dynamic action pose, bold outlines, vibrant colors, dramatic energy effects, speed lines in background, epic battle scene composition"},
+  {cat:"Logo设计",name:"极简Logo",tags:["Logo","简约"],desc:"科技公司极简Logo，几何图形，单色白底",prompt:"Minimalist logo design for a tech startup, clean geometric shapes, single color on white background, modern and elegant, scalable vector style, no text"},
+  {cat:"Logo设计",name:"复古徽章",tags:["Logo","复古"],desc:"手工咖啡品牌复古徽章Logo，圆形设计",prompt:"Vintage emblem logo for a craft coffee brand, circular badge design, engraved illustration style, warm brown and cream colors, retro typography, artisan feel"},
+  {cat:"海报设计",name:"电影海报",tags:["海报","电影"],desc:"科幻惊悚电影海报，暗色基调，戏剧性构图",prompt:"Movie poster for a sci-fi thriller, dramatic composition, dark moody color palette with one accent color, cinematic lighting, bold typography at the bottom, professional Hollywood poster style"},
+  {cat:"海报设计",name:"音乐节海报",tags:["海报","音乐"],desc:"音乐节海报，霓虹色彩，抽象几何图形",prompt:"Music festival poster design, vibrant neon colors, abstract geometric shapes, modern typography, energetic and dynamic composition, summer vibes, graphic design style"},
+  {cat:"建筑室内",name:"现代客厅",tags:["室内","现代"],desc:"极简现代客厅，落地窗，北欧家具",prompt:"Interior photograph of a modern minimalist living room, floor-to-ceiling windows, natural light, Scandinavian furniture, concrete and wood accents, architectural photography, wide angle"},
+  {cat:"建筑室内",name:"咖啡厅内景",tags:["室内","咖啡"],desc:"精品咖啡店内景，裸露砖墙，黄铜咖啡机",prompt:"Interior photograph of a small specialty coffee shop, exposed brick walls, brass espresso machine, warm morning light through the front window, cozy atmosphere, documentary style"},
+  {cat:"概念艺术",name:"奇幻场景",tags:["奇幻","概念"],desc:"史诗奇幻场景，悬崖上的龙，城堡废墟，神秘雾气",prompt:"Epic fantasy landscape, dragon on a cliff with blue iridescent scales, wings spread, castle ruins below, mystical fog, dramatic lighting, concept art, digital painting"},
+  {cat:"概念艺术",name:"科幻场景",tags:["科幻","未来"],desc:"外星球未来城市，漂浮建筑，生物发光植被",prompt:"Futuristic city on another planet, floating architecture, bioluminescent vegetation, alien sky with two moons, sci-fi concept art, cinematic wide shot, hyper-detailed"},
+  {cat:"社交媒体",name:"Instagram风格",tags:["社交","生活"],desc:"Instagram生活方式，金色阳光，咖啡和笔记本平铺",prompt:"Lifestyle Instagram photo, golden hour, aesthetic flat lay of coffee and pastel notebooks, soft pink and beige tones, bokeh background, influencer style photography"},
+  {cat:"社交媒体",name:"YouTube封面",tags:["社交","封面"],desc:"YouTube封面，醒目文字，明亮对比色",prompt:"YouTube thumbnail with bold text overlay, excited expression, bright contrasting colors, clickbait style composition, high energy, professional thumbnail design"},
+];
+
+function initTemplates(){
+  const cats=[...new Set(TEMPLATES.map(t=>t.cat))];
+  const sel=document.getElementById('tpl-category');
+  sel.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  renderTemplates();
+}
+function renderTemplates(){
+  const cat=document.getElementById('tpl-category').value;
+  const list=document.getElementById('tpl-list');
+  const items=TEMPLATES.filter(t=>t.cat===cat);
+  list.innerHTML=items.map((t,i)=>{
+    const idx=TEMPLATES.indexOf(t);
+    return `<div class="tpl-card" onclick="useTemplate(${idx})">
+      <h4>${t.name}</h4>
+      <p>${t.desc}</p>
+      <div class="tpl-tags">${t.tags.map(tag=>`<span class="tpl-tag">${tag}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+function useTemplate(idx){
+  const t=TEMPLATES[idx];
+  switchTab('generate');
+  const translateOn=document.getElementById('gen-translate-toggle').classList.contains('on');
+  document.getElementById('gen-prompt').value=translateOn?t.desc:t.prompt;
+}
+
+// ==================== Config Presets ====================
+function getPresets(){
+  try{return JSON.parse(localStorage.getItem('gpt-img-presets')||'[]')}catch(e){return[]}
+}
+function savePresetsToStorage(presets){
+  try{localStorage.setItem('gpt-img-presets',JSON.stringify(presets))}catch(e){}
+}
+function renderPresetDropdown(){
+  const sel=document.getElementById('cfg-preset-select');
+  const presets=getPresets();
+  sel.innerHTML='<option value="">-- '+(lang==='zh'?'选择预设':'Select preset')+' --</option>'+
+    presets.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');
+}
+function loadPreset(){
+  const sel=document.getElementById('cfg-preset-select');
+  const idx=parseInt(sel.value);
+  if(isNaN(idx))return;
+  const presets=getPresets();
+  if(presets[idx]){
+    document.getElementById('cfg-baseurl').value=presets[idx].baseUrl||'';
+    document.getElementById('cfg-apikey').value=presets[idx].apiKey||'';
+  }
+}
+function savePreset(){
+  const baseUrl=document.getElementById('cfg-baseurl').value.trim();
+  const apiKey=document.getElementById('cfg-apikey').value.trim();
+  if(!baseUrl){showToast(lang==='zh'?'请输入 Base URL':'Enter Base URL','error');return}
+  const name=prompt(lang==='zh'?'输入预设名称:':'Preset name:',baseUrl.replace(/^https?:\/\//,'').split('/')[0]);
+  if(!name)return;
+  const presets=getPresets();
+  presets.push({name,baseUrl,apiKey});
+  savePresetsToStorage(presets);
+  renderPresetDropdown();
+  showToast(lang==='zh'?'预设已保存':'Preset saved','success');
+}
+function deletePreset(){
+  const sel=document.getElementById('cfg-preset-select');
+  const idx=parseInt(sel.value);
+  if(isNaN(idx))return;
+  const presets=getPresets();
+  presets.splice(idx,1);
+  savePresetsToStorage(presets);
+  sel.value='';
+  renderPresetDropdown();
+  showToast(lang==='zh'?'预设已删除':'Preset deleted','success');
+}
+
+// ==================== Test Connection ====================
+async function testConnection(){
+  const baseUrl=document.getElementById('cfg-baseurl').value.trim().replace(/\/+$/,'');
+  const apiKey=document.getElementById('cfg-apikey').value.trim();
+  const resultEl=document.getElementById('test-result');
+  resultEl.className='test-result show';
+  resultEl.textContent=lang==='zh'?'正在测试...':'Testing...';
+  resultEl.style.color='var(--text2)';
+  resultEl.style.background='var(--surface3)';
+  if(!baseUrl||!apiKey){
+    resultEl.className='test-result show fail';
+    resultEl.textContent=lang==='zh'?'✗ 请填写 Base URL 和 API Key':'✗ Enter Base URL and API Key';
+    return;
+  }
+  try{
+    const resp=await fetch(baseUrl+'/models',{
+      headers:{'Authorization':'Bearer '+apiKey},
+      signal:AbortSignal.timeout(10000)
+    });
+    if(resp.ok){
+      resultEl.className='test-result show ok';
+      resultEl.textContent=lang==='zh'?'✓ 连接成功':'✓ Connected';
+    }else{
+      const err=await resp.json().catch(()=>({}));
+      resultEl.className='test-result show fail';
+      resultEl.textContent='✗ HTTP '+resp.status+(err.error?.message?' - '+err.error.message:'');
+    }
+  }catch(e){
+    resultEl.className='test-result show fail';
+    resultEl.textContent='✗ '+(lang==='zh'?'连接失败: ':'Failed: ')+e.message;
+  }
+}
+
+// ==================== Prompt History ====================
+function getPromptHistory(){
+  try{return JSON.parse(localStorage.getItem('gpt-img-prompt-history')||'[]')}catch(e){return[]}
+}
+function addPromptToHistory(prompt){
+  if(!prompt)return;
+  let list=getPromptHistory();
+  list=list.filter(p=>p!==prompt);
+  list.unshift(prompt);
+  if(list.length>50)list=list.slice(0,50);
+  localStorage.setItem('gpt-img-prompt-history',JSON.stringify(list));
+}
+function togglePromptHistory(prefix){
+  const drop=document.getElementById(prefix+'-prompt-history');
+  if(drop.classList.contains('show')){drop.classList.remove('show');return}
+  const list=getPromptHistory();
+  if(list.length===0){showToast(lang==='zh'?'暂无提示词历史':'No prompt history','error');return}
+  drop.innerHTML=list.map(p=>
+    `<div class="prompt-history-item" onclick="selectPromptHistory('${prefix}',this)">${p.replace(/</g,'&lt;')}</div>`
+  ).join('');
+  drop.classList.add('show');
+}
+function selectPromptHistory(prefix,el){
+  const ta=document.getElementById(prefix+'-prompt');
+  ta.value=el.textContent;
+  document.getElementById(prefix+'-prompt-history').classList.remove('show');
+}
+// Close prompt history when clicking outside
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.prompt-history-wrap')){
+    document.querySelectorAll('.prompt-history-drop').forEach(d=>d.classList.remove('show'));
+  }
+});
+
+// ==================== Keyboard Shortcuts ====================
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeLightbox();
+    hideConfig();
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    e.preventDefault();
+    if(currentTab==='generate')generateImage();
+    else editImage();
+  }
+});
+
+// ==================== Boot ====================
+init();
+</script>
+</body>
+</html>
