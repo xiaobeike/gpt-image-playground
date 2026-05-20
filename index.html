@@ -35,7 +35,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','H
 
 /* ===== Buttons ===== */
 .btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1.25;-webkit-appearance:none;appearance:none;font-family:inherit;text-rendering:optimizeLegibility}
-.btn-text{display:inline-block;line-height:inherit;font:inherit;color:inherit;white-space:inherit}
 .btn:hover{border-color:var(--border2);background:var(--surface2)}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(16,163,127,.25)}
@@ -63,7 +62,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','H
 /* ===== Tabs ===== */
 .tabs{display:flex;gap:2px;background:var(--surface3);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px}
 .tab{flex:1;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-radius:var(--radius-xs);transition:all var(--transition);font-weight:500;text-align:center;display:flex;align-items:center;justify-content:center;min-height:34px;line-height:1.25}
-.tab-text{display:inline-block;line-height:inherit;font:inherit;color:inherit;white-space:inherit}
 .tab.active{color:var(--text);background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
 .tab:not(.disabled):hover{color:var(--text)}
 .tab.disabled{opacity:.35;cursor:default;pointer-events:none;font-size:12px}
@@ -258,9 +256,9 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
-    <button class="btn btn-sm" onclick="showConfig()">
+    <button class="btn btn-sm" onclick="showConfig()" data-i18n="config" data-label-zh="配置接口" data-label-en="API Config">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span data-i18n="config">配置接口</span>
+      配置接口
     </button>
   </div>
 </div>
@@ -270,8 +268,8 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate" data-label-zh="生成图片" data-label-en="Generate"><span class="tab-text">生成图片</span></div>
-      <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit" data-label-zh="编辑图片" data-label-en="Edit"><span class="tab-text">编辑图片</span></div>
+      <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate" data-label-zh="生成图片" data-label-en="Generate">生成图片</div>
+      <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit" data-label-zh="编辑图片" data-label-en="Edit">编辑图片</div>
       <div class="tab" onclick="switchTab('templates')" id="tab-templates">模板</div>
     </div>
 
@@ -368,7 +366,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn" data-label-zh="生成" data-label-en="Generate"><span class="btn-text">生成</span></button>
+      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn" data-label-zh="生成" data-label-en="Generate">生成</button>
     </div>
 
     <!-- ===== Edit Panel ===== -->
@@ -408,13 +406,13 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="form-group">
-        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask" data-label-zh="创建蒙版" data-label-en="Create Mask"><span class="btn-text">创建蒙版</span></button>
+        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask" data-label-zh="创建蒙版" data-label-en="Create Mask">创建蒙版</button>
         <div class="mask-container" id="mask-container">
           <div class="mask-toolbar">
             <span style="font-size:12px;color:var(--text2)" data-i18n="brush_size">画笔</span>
             <input type="range" id="brush-size" min="5" max="80" value="25">
-            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear" data-label-zh="清除" data-label-en="Clear"><span class="btn-text">清除</span></button>
-            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo" data-label-zh="撤销" data-label-en="Undo"><span class="btn-text">撤销</span></button>
+            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear" data-label-zh="清除" data-label-en="Clear">清除</button>
+            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo" data-label-zh="撤销" data-label-en="Undo">撤销</button>
           </div>
           <canvas id="mask-canvas" width="512" height="512"></canvas>
         </div>
@@ -485,7 +483,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn" data-label-zh="编辑图片" data-label-en="Edit Image"><span class="btn-text">编辑图片</span></button>
+      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn" data-label-zh="编辑图片" data-label-en="Edit Image">编辑图片</button>
     </div>
 
     <!-- ===== Templates Panel ===== -->
@@ -519,7 +517,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     <div class="history-section" id="history-section" style="display:none">
       <div class="history-header">
         <h3 data-i18n="history">历史记录</h3>
-        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all" data-label-zh="清除全部" data-label-en="Clear All"><span class="btn-text">清除全部</span></button>
+        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all" data-label-zh="清除全部" data-label-en="Clear All">清除全部</button>
       </div>
       <div class="history-grid" id="history-grid"></div>
     </div>
@@ -545,9 +543,9 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     </div>
     <div class="test-result" id="test-result"></div>
     <div class="modal-actions">
-      <button class="btn" onclick="hideConfig()" data-i18n="cancel" data-label-zh="取消" data-label-en="Cancel"><span class="btn-text">取消</span></button>
-      <button class="btn" onclick="testConnection()" data-i18n="test_conn" data-label-zh="测试连接" data-label-en="Test Connection"><span class="btn-text">测试连接</span></button>
-      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save" data-label-zh="保存" data-label-en="Save"><span class="btn-text">保存</span></button>
+      <button class="btn" onclick="hideConfig()" data-i18n="cancel" data-label-zh="取消" data-label-en="Cancel">取消</button>
+      <button class="btn" onclick="testConnection()" data-i18n="test_conn" data-label-zh="测试连接" data-label-en="Test Connection">测试连接</button>
+      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save" data-label-zh="保存" data-label-en="Save">保存</button>
     </div>
   </div>
 </div>
@@ -557,8 +555,8 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
   <div class="lightbox-close">×</div>
   <img id="lightbox-img" src="" alt="">
   <div class="lightbox-actions">
-    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download" data-label-zh="下载" data-label-en="Download"><span class="btn-text">下载</span></button>
-    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit" data-label-zh="发送到编辑" data-label-en="Send to Edit"><span class="btn-text">发送到编辑</span></button>
+    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download" data-label-zh="下载" data-label-en="Download">下载</button>
+    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit" data-label-zh="发送到编辑" data-label-en="Send to Edit">发送到编辑</button>
   </div>
 </div>
 
