@@ -254,7 +254,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     <h1>GPT Image Playground<span>图片工坊</span></h1>
   </div>
   <div class="header-actions">
-    <button class="icon-btn" onclick="toggleLang()" id="langBtn" title="Language">EN</button>
+    <button class="icon-btn" id="langBtn" title="Language" style="display:none">EN</button>
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
@@ -567,7 +567,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
 
 <script>
 // ==================== State ====================
-let lang = localStorage.getItem('gpt-img-lang') || 'zh';
+let lang = 'zh';
 let theme = localStorage.getItem('gpt-img-theme') || 'light';
 let config = JSON.parse(localStorage.getItem('gpt-img-config') || '{}');
 let historyList = [];
@@ -617,45 +617,13 @@ const i18n = {
   }
 };
 function t(k){return i18n[lang]?.[k]||k}
-function applyI18n(){
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const k=el.getAttribute('data-i18n');
-    const txt=t(k);
-    if(el.tagName==='BUTTON'){
-      const zh=el.getAttribute('data-label-zh');
-      const en=el.getAttribute('data-label-en');
-      if(zh||en){
-        const labelEl=el.querySelector('.btn-text');
-        if(labelEl) labelEl.textContent=lang==='zh'?(zh||txt):(en||txt);
-        else el.textContent=lang==='zh'?(zh||txt):(en||txt);
-      }
-      return;
-    }
-    if(el.classList?.contains('tab')){
-      const zh=el.getAttribute('data-label-zh');
-      const en=el.getAttribute('data-label-en');
-      if(zh||en){
-        const labelEl=el.querySelector('.tab-text');
-        if(labelEl) labelEl.textContent=lang==='zh'?(zh||txt):(en||txt);
-        else el.textContent=lang==='zh'?(zh||txt):(en||txt);
-      }
-      return;
-    }
-    if(el.tagName==='INPUT' || el.tagName==='TEXTAREA')el.placeholder=txt;
-    else el.textContent=txt;
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
-    el.placeholder=t(el.getAttribute('data-i18n-ph'));
-  });
-  document.getElementById('langBtn').textContent=lang==='zh'?'EN':'中';
-}
+function applyI18n(){}
 
 // ==================== Init ====================
 function init(){
   if(theme==='dark')document.body.classList.add('dark');
   document.getElementById('cfg-baseurl').value=config.baseUrl||'';
   document.getElementById('cfg-apikey').value=config.apiKey||'';
-  applyI18n();
   setupSizeListeners('gen');
   setupSizeListeners('edit');
   initMaskCanvas();
@@ -691,11 +659,7 @@ function toggleTheme(){
 }
 
 // ==================== Language ====================
-function toggleLang(){
-  lang=lang==='zh'?'en':'zh';
-  localStorage.setItem('gpt-img-lang',lang);
-  applyI18n();
-}
+function toggleLang(){}
 
 // ==================== Tabs ====================
 function switchTab(tab){
@@ -732,7 +696,7 @@ function saveConfig(){
   config.apiKey=document.getElementById('cfg-apikey').value.trim();
   localStorage.setItem('gpt-img-config',JSON.stringify(config));
   hideConfig();
-  showToast(t('config_saved'),'success');
+  showToast('配置已保存','success');
 }
 
 // ==================== Toast ====================
@@ -747,7 +711,7 @@ function showToast(msg,type=''){
 function handleUpload(e){
   const files=Array.from(e.target.files);
   if(uploadedFiles.length+files.length>10){
-    showToast(t('max_images'),'error');return;
+    showToast('最多上传10张图片','error');return;
   }
   files.forEach(f=>{
     if(uploadedFiles.length>=10)return;
@@ -1115,8 +1079,8 @@ function makeResultCard(imgSrc,fmt,info){
     <img src="${imgSrc}" onclick="openLightbox(this.src)" loading="lazy">
     ${badges}
     <div class="actions">
-      <button class="btn btn-sm" onclick="downloadResultImage(this.closest('.result-card').querySelector('img').src,'${fmt}')">${t('download')}</button>
-      <button class="btn btn-sm" onclick="sendToEdit(this)">${t('send_edit')}</button>
+      <button class="btn btn-sm" onclick="downloadResultImage(this.closest('.result-card').querySelector('img').src,'${fmt}')">下载</button>
+      <button class="btn btn-sm" onclick="sendToEdit(this)">发送到编辑</button>
     </div>
   </div>`;
 }
@@ -1181,16 +1145,16 @@ async function processResults(json,fmt,upscaleFactor,info){
 // ==================== Generate Image ====================
 async function generateImage(){
   if(isGenerating)return;
-  if(!config.baseUrl||!config.apiKey){showToast(t('no_config'),'error');showConfig();return}
+  if(!config.baseUrl||!config.apiKey){showToast('请先配置 Base URL 和 API Key','error');showConfig();return}
 
   const model=document.getElementById('gen-model').value;
   const rawPrompt=document.getElementById('gen-prompt').value.trim();
-  if(!rawPrompt){showToast(t('enter_prompt'),'error');return}
+  if(!rawPrompt){showToast('请输入提示词','error');return}
   addPromptToHistory(rawPrompt);
   const translateOn=document.getElementById('gen-translate-toggle').classList.contains('on');
   let prompt=rawPrompt;
   if(translateOn&&hasChinese(rawPrompt)){
-    showToast(lang==='zh'?'正在翻译提示词...':'Translating prompt...','success');
+    showToast('正在翻译提示词...','success');
     prompt=await translatePrompt(rawPrompt);
   }
   const n=parseInt(document.getElementById('gen-qty').value)||1;
@@ -1209,7 +1173,7 @@ async function generateImage(){
   }
   if(!streamOn) body.response_format='b64_json';
 
-  showLoading(t('generating'));
+  showLoading('正在生成...');
   document.getElementById('result-images').innerHTML='';
   showProgress(10);
 
@@ -1282,24 +1246,24 @@ async function generateImage(){
     hideLoading();
   }catch(e){
     hideLoading();hideStreamPreview();
-    showToast(t('generate_error')+': '+e.message,'error');
+    showToast('生成失败: '+e.message,'error');
   }
 }
 
 // ==================== Edit Image ====================
 async function editImage(){
   if(isGenerating)return;
-  if(!config.baseUrl||!config.apiKey){showToast(t('no_config'),'error');showConfig();return}
-  if(uploadedFiles.length===0){showToast(t('upload_image'),'error');return}
+  if(!config.baseUrl||!config.apiKey){showToast('请先配置 Base URL 和 API Key','error');showConfig();return}
+  if(uploadedFiles.length===0){showToast('请上传源图片','error');return}
 
   const model=document.getElementById('edit-model').value;
   const rawPrompt=document.getElementById('edit-prompt').value.trim();
-  if(!rawPrompt){showToast(t('enter_prompt'),'error');return}
+  if(!rawPrompt){showToast('请输入提示词','error');return}
   addPromptToHistory(rawPrompt);
   const translateOn=document.getElementById('edit-translate-toggle').classList.contains('on');
   let prompt=rawPrompt;
   if(translateOn&&hasChinese(rawPrompt)){
-    showToast(lang==='zh'?'正在翻译提示词...':'Translating prompt...','success');
+    showToast('正在翻译提示词...','success');
     prompt=await translatePrompt(rawPrompt);
   }
   const n=parseInt(document.getElementById('edit-qty').value)||1;
@@ -1309,7 +1273,7 @@ async function editImage(){
   const moderation=getRadio('edit-moderation');
   const upscaleFactor=parseInt(getRadio('edit-upscale'));
 
-  showLoading(t('editing'));
+  showLoading('正在编辑...');
   document.getElementById('result-images').innerHTML='';
   showProgress(10);
 
@@ -1344,7 +1308,7 @@ async function editImage(){
     hideLoading();
   }catch(e){
     hideLoading();
-    showToast(t('edit_error')+': '+e.message,'error');
+    showToast('编辑失败: '+e.message,'error');
   }
 }
 
@@ -1418,7 +1382,7 @@ function savePresetsToStorage(presets){
 function renderPresetDropdown(){
   const sel=document.getElementById('cfg-preset-select');
   const presets=getPresets();
-  sel.innerHTML='<option value="">-- '+(lang==='zh'?'选择预设':'Select preset')+' --</option>'+
+  sel.innerHTML='<option value="">-- 选择预设 --</option>'+
     presets.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');
 }
 function loadPreset(){
@@ -1434,14 +1398,14 @@ function loadPreset(){
 function savePreset(){
   const baseUrl=document.getElementById('cfg-baseurl').value.trim();
   const apiKey=document.getElementById('cfg-apikey').value.trim();
-  if(!baseUrl){showToast(lang==='zh'?'请输入 Base URL':'Enter Base URL','error');return}
-  const name=prompt(lang==='zh'?'输入预设名称:':'Preset name:',baseUrl.replace(/^https?:\/\//,'').split('/')[0]);
+  if(!baseUrl){showToast('请输入 Base URL','error');return}
+  const name=prompt('输入预设名称:',baseUrl.replace(/^https?:\/\//,'').split('/')[0]);
   if(!name)return;
   const presets=getPresets();
   presets.push({name,baseUrl,apiKey});
   savePresetsToStorage(presets);
   renderPresetDropdown();
-  showToast(lang==='zh'?'预设已保存':'Preset saved','success');
+  showToast('预设已保存','success');
 }
 function deletePreset(){
   const sel=document.getElementById('cfg-preset-select');
@@ -1452,7 +1416,7 @@ function deletePreset(){
   savePresetsToStorage(presets);
   sel.value='';
   renderPresetDropdown();
-  showToast(lang==='zh'?'预设已删除':'Preset deleted','success');
+  showToast('预设已删除','success');
 }
 
 // ==================== Test Connection ====================
@@ -1461,12 +1425,12 @@ async function testConnection(){
   const apiKey=document.getElementById('cfg-apikey').value.trim();
   const resultEl=document.getElementById('test-result');
   resultEl.className='test-result show';
-  resultEl.textContent=lang==='zh'?'正在测试...':'Testing...';
+  resultEl.textContent='正在测试...';
   resultEl.style.color='var(--text2)';
   resultEl.style.background='var(--surface3)';
   if(!baseUrl||!apiKey){
     resultEl.className='test-result show fail';
-    resultEl.textContent=lang==='zh'?'✗ 请填写 Base URL 和 API Key':'✗ Enter Base URL and API Key';
+    resultEl.textContent='✗ 请填写 Base URL 和 API Key';
     return;
   }
   try{
@@ -1476,7 +1440,7 @@ async function testConnection(){
     });
     if(resp.ok){
       resultEl.className='test-result show ok';
-      resultEl.textContent=lang==='zh'?'✓ 连接成功':'✓ Connected';
+      resultEl.textContent='✓ 连接成功';
     }else{
       const err=await resp.json().catch(()=>({}));
       resultEl.className='test-result show fail';
@@ -1484,7 +1448,7 @@ async function testConnection(){
     }
   }catch(e){
     resultEl.className='test-result show fail';
-    resultEl.textContent='✗ '+(lang==='zh'?'连接失败: ':'Failed: ')+e.message;
+    resultEl.textContent='✗ 连接失败: '+e.message;
   }
 }
 
@@ -1504,7 +1468,7 @@ function togglePromptHistory(prefix){
   const drop=document.getElementById(prefix+'-prompt-history');
   if(drop.classList.contains('show')){drop.classList.remove('show');return}
   const list=getPromptHistory();
-  if(list.length===0){showToast(lang==='zh'?'暂无提示词历史':'No prompt history','error');return}
+  if(list.length===0){showToast('暂无提示词历史','error');return}
   drop.innerHTML=list.map(p=>
     `<div class="prompt-history-item" onclick="selectPromptHistory('${prefix}',this)">${p.replace(/</g,'&lt;')}</div>`
   ).join('');
