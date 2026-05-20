@@ -24,7 +24,7 @@
   --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
   --shadow-lg:0 4px 24px rgba(0,0,0,.4);
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--transition),color var(--transition);overflow:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--transition),color var(--transition);overflow:hidden;-webkit-font-smoothing:antialiased}
 
 /* ===== Header ===== */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
@@ -34,8 +34,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 .header-actions{display:flex;align-items:center;gap:4px}
 
 /* ===== Buttons ===== */
-.btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1.25}
-.btn-text{display:inline-block;line-height:inherit}
+.btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1.25;-webkit-appearance:none;appearance:none;font-family:inherit;text-rendering:optimizeLegibility}
+.btn-text{display:inline-block;line-height:inherit;font:inherit;color:inherit;white-space:inherit}
 .btn:hover{border-color:var(--border2);background:var(--surface2)}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(16,163,127,.25)}
@@ -63,7 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 /* ===== Tabs ===== */
 .tabs{display:flex;gap:2px;background:var(--surface3);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px}
 .tab{flex:1;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-radius:var(--radius-xs);transition:all var(--transition);font-weight:500;text-align:center;display:flex;align-items:center;justify-content:center;min-height:34px;line-height:1.25}
-.tab-text{display:inline-block;line-height:inherit}
+.tab-text{display:inline-block;line-height:inherit;font:inherit;color:inherit;white-space:inherit}
 .tab.active{color:var(--text);background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
 .tab:not(.disabled):hover{color:var(--text)}
 .tab.disabled{opacity:.35;cursor:default;pointer-events:none;font-size:12px}
