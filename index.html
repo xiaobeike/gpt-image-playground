@@ -569,7 +569,17 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
 // ==================== State ====================
 let lang = 'zh';
 let theme = localStorage.getItem('gpt-img-theme') || 'light';
-let config = JSON.parse(localStorage.getItem('gpt-img-config') || '{}');
+function safeParseJSON(key,fallback){
+  try{
+    const raw=localStorage.getItem(key);
+    return raw?JSON.parse(raw):fallback;
+  }catch(e){
+    console.warn('Ignoring invalid localStorage JSON for',key,e);
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
+let config = safeParseJSON('gpt-img-config',{});
 let historyList = [];
 let uploadedFiles = [];
 let currentTab = 'generate';
@@ -829,8 +839,10 @@ function getMaskBase64(){
 }
 
 // ==================== API Helpers ====================
-function getHeaders(){
-  return {'Content-Type':'application/json','Authorization':'Bearer '+config.apiKey};
+function getHeaders(includeJson=true){
+  const headers={'Authorization':'Bearer '+config.apiKey};
+  if(includeJson) headers['Content-Type']='application/json';
+  return headers;
 }
 function getRadio(name){
   return document.querySelector('input[name="'+name+'"]:checked')?.value;
@@ -843,6 +855,108 @@ function getSizeStr(prefix){
     return w&&h?w+'x'+h:'1024x1024';
   }
   return v;
+}
+function dataUrlToBlob(dataUrl){
+  const [meta,data='']=dataUrl.split(',');
+  const mime=meta.match(/data:([^;]+)/)?.[1]||'application/octet-stream';
+  const binary=atob(data);
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes],{type:mime});
+}
+async function toUploadBlob(fileLike,fallbackName){
+  if(fileLike?.file instanceof File)return {blob:fileLike.file,name:fileLike.file.name||fallbackName};
+  if(fileLike?.data?.startsWith('data:'))return {blob:dataUrlToBlob(fileLike.data),name:fileLike.name||fallbackName};
+  if(fileLike?.data){
+    const resp=await fetch(fileLike.data);
+    if(!resp.ok)throw new Error('无法读取待编辑图片');
+    return {blob:await resp.blob(),name:fileLike.name||fallbackName};
+  }
+  throw new Error('缺少待编辑图片数据');
+}
+async function buildEditFormData(opts){
+  const form=new FormData();
+  form.append('model',opts.model);
+  form.append('prompt',opts.prompt);
+  form.append('n',String(opts.n));
+  if(opts.size&&opts.size!=='auto')form.append('size',opts.size);
+  if(opts.quality&&opts.quality!=='auto')form.append('quality',opts.quality);
+  if(opts.moderation&&opts.moderation!=='auto')form.append('moderation',opts.moderation);
+  if(opts.streamOn){
+    form.append('stream','true');
+    form.append('partial_images','2');
+  }
+  for(let i=0;i<opts.files.length;i++){
+    const {blob,name}=await toUploadBlob(opts.files[i],`image-${i+1}.png`);
+    form.append('image',blob,name);
+  }
+  if(opts.maskBase64){
+    const maskBlob=dataUrlToBlob('data:image/png;base64,'+opts.maskBase64);
+    form.append('mask',maskBlob,'mask.png');
+  }
+  return form;
+}
+async function readImageStreamResponse(resp,fmt,upscaleFactor,info){
+  const reader=resp.body?.getReader();
+  if(!reader)throw new Error('当前响应不支持流式读取');
+  const decoder=new TextDecoder();
+  let buffer='';
+  let finalData=null;
+  let previewSrc='';
+  let step=0;
+
+  while(true){
+    const {done,value}=await reader.read();
+    if(done)break;
+    buffer+=decoder.decode(value,{stream:true});
+    const lines=buffer.split('\n');
+    buffer=lines.pop()||'';
+
+    for(const rawLine of lines){
+      const line=rawLine.trim();
+      if(!line.startsWith('data:'))continue;
+      const data=line.slice(5).trim();
+      if(!data||data==='[DONE]')continue;
+      try{
+        const parsed=JSON.parse(data);
+        const type=parsed.type||'';
+        const b64=parsed.partial_image_b64||parsed.b64_json;
+        const url=parsed.url;
+
+        if(type.includes('partial')&&b64){
+          previewSrc='data:image/png;base64,'+b64;
+          showStreamPreview(previewSrc);
+          step++;
+          showProgress(Math.min(75,30+step*15));
+          continue;
+        }
+        if(parsed.data){
+          finalData=parsed;
+          continue;
+        }
+        if((type.endsWith('.completed')||type.endsWith('.result')||!type)&&(b64||url)){
+          finalData={data:[b64?{b64_json:b64}:{url}]};
+        }
+      }catch(e){}
+    }
+  }
+
+  hideStreamPreview();
+  showProgress(80);
+
+  if(finalData?.data){
+    await processResults(finalData,fmt,upscaleFactor,info);
+    return;
+  }
+  if(previewSrc){
+    let imgSrc=previewSrc;
+    if(upscaleFactor>1)imgSrc=await upscaleImage(imgSrc,upscaleFactor);
+    imgSrc=await convertFormat(imgSrc,fmt);
+    document.getElementById('result-images').innerHTML=makeResultCard(imgSrc,fmt,info);
+    addHistory(imgSrc);
+    return;
+  }
+  throw new Error('流式响应中未找到图片数据');
 }
 
 // ==================== Auto Translate ====================
@@ -981,11 +1095,8 @@ function getThumbFromDataUrl(dataUrl,maxSize=80){
   });
 }
 function loadHistoryFromStorage(){
-  try{
-    const stored=localStorage.getItem('gpt-img-history');
-    if(stored) historyList=JSON.parse(stored);
-    historyList.forEach(h=>{if(!h.id)h.id=null});
-  }catch(e){historyList=[]}
+  historyList=safeParseJSON('gpt-img-history',[]);
+  historyList.forEach(h=>{if(!h.id)h.id=null});
 }
 function saveHistoryToStorage(){
   try{
@@ -1171,7 +1282,10 @@ async function generateImage(){
     if(quality!=='auto') body.quality=quality;
     if(moderation!=='auto') body.moderation=moderation;
   }
-  if(!streamOn) body.response_format='b64_json';
+  if(streamOn){
+    body.stream=true;
+    body.partial_images=2;
+  }
 
   showLoading('正在生成...');
   document.getElementById('result-images').innerHTML='';
@@ -1192,48 +1306,7 @@ async function generateImage(){
 
     if(streamOn && (contentType.includes('text/event-stream')||contentType.includes('application/octet-stream'))){
       showProgress(30);
-      const reader=resp.body.getReader();
-      const decoder=new TextDecoder();
-      let buffer='';
-      let finalData=null;
-      let partialImage=null;
-
-      while(true){
-        const{done,value}=await reader.read();
-        if(done)break;
-        buffer+=decoder.decode(value,{stream:true});
-        const lines=buffer.split('\n');
-        buffer=lines.pop()||'';
-
-        for(const line of lines){
-          if(!line.startsWith('data:'))continue;
-          const data=line.slice(5).trim();
-          if(data==='[DONE]')continue;
-          try{
-            const parsed=JSON.parse(data);
-            if(parsed.partial_image_b64){
-              partialImage='data:image/png;base64,'+parsed.partial_image_b64;
-              showStreamPreview(partialImage);
-              showProgress(30+Math.min(50,parsed.progress||30));
-            }
-            if(parsed.data) finalData=parsed;
-            if(parsed.b64_json) showStreamPreview('data:image/png;base64,'+parsed.b64_json);
-          }catch(e){}
-        }
-      }
-
-      hideStreamPreview();
-      showProgress(80);
-
-      if(finalData?.data){
-        await processResults(finalData,fmt,upscaleFactor,genInfo);
-      }else if(partialImage){
-        let imgSrc=partialImage;
-        if(upscaleFactor>1) imgSrc=await upscaleImage(imgSrc,upscaleFactor);
-        imgSrc=await convertFormat(imgSrc,fmt);
-        document.getElementById('result-images').innerHTML=makeResultCard(imgSrc,fmt,genInfo);
-        addHistory(imgSrc);
-      }
+      await readImageStreamResponse(resp,fmt,upscaleFactor,genInfo);
     } else {
       showProgress(60);
       const json=await resp.json();
@@ -1272,6 +1345,7 @@ async function editImage(){
   const fmt=getRadio('edit-format');
   const moderation=getRadio('edit-moderation');
   const upscaleFactor=parseInt(getRadio('edit-upscale'));
+  const streamOn=document.getElementById('edit-stream-toggle').classList.contains('on');
 
   showLoading('正在编辑...');
   document.getElementById('result-images').innerHTML='';
@@ -1280,30 +1354,35 @@ async function editImage(){
   const editInfo={model,size:sizeVal!=='auto'?sizeVal:'auto',quality,format:fmt};
 
   try{
-    const body={model,prompt,n};
-    body.image=uploadedFiles.map(f=>f.data.split(',')[1]);
-    if(sizeVal!=='auto') body.size=sizeVal;
-    if(quality!=='auto') body.quality=quality;
-    if(moderation!=='auto') body.moderation=moderation;
-
     const maskContainer=document.getElementById('mask-container');
-    if(maskContainer.classList.contains('show')){
-      body.mask=getMaskBase64();
-    }
+    const maskBase64=maskContainer.classList.contains('show')?getMaskBase64():'';
+    const body=await buildEditFormData({
+      model,prompt,n,
+      size:sizeVal,
+      quality,
+      moderation,
+      streamOn,
+      files:uploadedFiles,
+      maskBase64
+    });
 
     showProgress(30);
     const resp=await fetch(config.baseUrl+'/images/edits',{
-      method:'POST',headers:getHeaders(),body:JSON.stringify(body)
+      method:'POST',headers:getHeaders(false),body
     });
     if(!resp.ok){
       const err=await resp.json().catch(()=>({}));
       throw new Error(err.error?.message||'HTTP '+resp.status);
     }
-    showProgress(60);
-    const json=await resp.json();
-
-    showProgress(80);
-    await processResults(json,fmt,upscaleFactor,editInfo);
+    const contentType=resp.headers.get('content-type')||'';
+    if(streamOn && (contentType.includes('text/event-stream')||contentType.includes('application/octet-stream'))){
+      await readImageStreamResponse(resp,fmt,upscaleFactor,editInfo);
+    }else{
+      showProgress(60);
+      const json=await resp.json();
+      showProgress(80);
+      await processResults(json,fmt,upscaleFactor,editInfo);
+    }
     showProgress(100);
     hideLoading();
   }catch(e){
@@ -1374,7 +1453,7 @@ function useTemplate(idx){
 
 // ==================== Config Presets ====================
 function getPresets(){
-  try{return JSON.parse(localStorage.getItem('gpt-img-presets')||'[]')}catch(e){return[]}
+  return safeParseJSON('gpt-img-presets',[]);
 }
 function savePresetsToStorage(presets){
   try{localStorage.setItem('gpt-img-presets',JSON.stringify(presets))}catch(e){}
@@ -1454,7 +1533,7 @@ async function testConnection(){
 
 // ==================== Prompt History ====================
 function getPromptHistory(){
-  try{return JSON.parse(localStorage.getItem('gpt-img-prompt-history')||'[]')}catch(e){return[]}
+  return safeParseJSON('gpt-img-prompt-history',[]);
 }
 function addPromptToHistory(prompt){
   if(!prompt)return;
