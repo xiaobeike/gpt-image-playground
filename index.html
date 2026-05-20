@@ -34,8 +34,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 .header-actions{display:flex;align-items:center;gap:4px}
 
 /* ===== Buttons ===== */
-.btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1}
-.btn-text{display:inline-block;line-height:1}
+.btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1.25}
+.btn-text{display:inline-block;line-height:inherit}
 .btn:hover{border-color:var(--border2);background:var(--surface2)}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(16,163,127,.25)}
@@ -62,8 +62,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 
 /* ===== Tabs ===== */
 .tabs{display:flex;gap:2px;background:var(--surface3);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px}
-.tab{flex:1;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-radius:var(--radius-xs);transition:all var(--transition);font-weight:500;text-align:center}
-.tab-text{display:inline-block;line-height:1.2}
+.tab{flex:1;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-radius:var(--radius-xs);transition:all var(--transition);font-weight:500;text-align:center;display:flex;align-items:center;justify-content:center;min-height:34px;line-height:1.25}
+.tab-text{display:inline-block;line-height:inherit}
 .tab.active{color:var(--text);background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
 .tab:not(.disabled):hover{color:var(--text)}
 .tab.disabled{opacity:.35;cursor:default;pointer-events:none;font-size:12px}
