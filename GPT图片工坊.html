@@ -35,6 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 
 /* ===== Buttons ===== */
 .btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1}
+.btn-label{display:inline;line-height:1}
 .btn:hover{border-color:var(--border2);background:var(--surface2)}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(16,163,127,.25)}
@@ -615,14 +616,29 @@ const i18n = {
   }
 };
 function t(k){return i18n[lang]?.[k]||k}
+function ensureButtonLabels(){
+  document.querySelectorAll('button[data-i18n]').forEach(btn=>{
+    let label=btn.querySelector('.btn-label');
+    if(!label){
+      label=document.createElement('span');
+      label.className='btn-label';
+      label.textContent=(btn.textContent||'').trim();
+      [...btn.childNodes].forEach(n=>{if(n.nodeType===3)n.nodeValue=''});
+      btn.appendChild(label);
+    }
+  });
+}
 function setI18nText(el,text){
   const txt=String(text??'');
-  const textNode=[...el.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.nodeValue.trim().length>0);
+  const textNode=[...el.childNodes].find(n=>n.nodeType===3&&n.nodeValue.trim().length>0);
   if(textNode){textNode.nodeValue=txt;return}
   if(el.childElementCount===0){el.textContent=txt;return}
+  const btnLabel=el.querySelector?.('.btn-label');
+  if(btnLabel){btnLabel.textContent=txt;return}
   el.setAttribute('aria-label',txt);
 }
 function applyI18n(){
+  ensureButtonLabels();
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k=el.getAttribute('data-i18n');
     const txt=t(k);
