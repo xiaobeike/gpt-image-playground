@@ -35,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 
 /* ===== Buttons ===== */
 .btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1}
-button[data-label-current]::before{content:attr(data-label-current);display:inline-block;line-height:1}
+.btn-text{display:inline-block;line-height:1}
 .btn:hover{border-color:var(--border2);background:var(--surface2)}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(16,163,127,.25)}
@@ -367,7 +367,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn" data-label-zh="生成" data-label-en="Generate" data-label-current="生成"></button>
+      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn" data-label-zh="生成" data-label-en="Generate"><span class="btn-text">生成</span></button>
     </div>
 
     <!-- ===== Edit Panel ===== -->
@@ -407,13 +407,13 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="form-group">
-        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask" data-label-zh="创建蒙版" data-label-en="Create Mask" data-label-current="创建蒙版"></button>
+        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask" data-label-zh="创建蒙版" data-label-en="Create Mask"><span class="btn-text">创建蒙版</span></button>
         <div class="mask-container" id="mask-container">
           <div class="mask-toolbar">
             <span style="font-size:12px;color:var(--text2)" data-i18n="brush_size">画笔</span>
             <input type="range" id="brush-size" min="5" max="80" value="25">
-            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear" data-label-zh="清除" data-label-en="Clear" data-label-current="清除"></button>
-            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo" data-label-zh="撤销" data-label-en="Undo" data-label-current="撤销"></button>
+            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear" data-label-zh="清除" data-label-en="Clear"><span class="btn-text">清除</span></button>
+            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo" data-label-zh="撤销" data-label-en="Undo"><span class="btn-text">撤销</span></button>
           </div>
           <canvas id="mask-canvas" width="512" height="512"></canvas>
         </div>
@@ -484,7 +484,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn" data-label-zh="编辑图片" data-label-en="Edit Image" data-label-current="编辑图片"></button>
+      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn" data-label-zh="编辑图片" data-label-en="Edit Image"><span class="btn-text">编辑图片</span></button>
     </div>
 
     <!-- ===== Templates Panel ===== -->
@@ -518,7 +518,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     <div class="history-section" id="history-section" style="display:none">
       <div class="history-header">
         <h3 data-i18n="history">历史记录</h3>
-        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all" data-label-zh="清除全部" data-label-en="Clear All" data-label-current="清除全部"></button>
+        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all" data-label-zh="清除全部" data-label-en="Clear All"><span class="btn-text">清除全部</span></button>
       </div>
       <div class="history-grid" id="history-grid"></div>
     </div>
@@ -544,9 +544,9 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     </div>
     <div class="test-result" id="test-result"></div>
     <div class="modal-actions">
-      <button class="btn" onclick="hideConfig()" data-i18n="cancel" data-label-zh="取消" data-label-en="Cancel" data-label-current="取消"></button>
-      <button class="btn" onclick="testConnection()" data-i18n="test_conn" data-label-zh="测试连接" data-label-en="Test Connection" data-label-current="测试连接"></button>
-      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save" data-label-zh="保存" data-label-en="Save" data-label-current="保存"></button>
+      <button class="btn" onclick="hideConfig()" data-i18n="cancel" data-label-zh="取消" data-label-en="Cancel"><span class="btn-text">取消</span></button>
+      <button class="btn" onclick="testConnection()" data-i18n="test_conn" data-label-zh="测试连接" data-label-en="Test Connection"><span class="btn-text">测试连接</span></button>
+      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save" data-label-zh="保存" data-label-en="Save"><span class="btn-text">保存</span></button>
     </div>
   </div>
 </div>
@@ -556,8 +556,8 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
   <div class="lightbox-close">×</div>
   <img id="lightbox-img" src="" alt="">
   <div class="lightbox-actions">
-    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download" data-label-zh="下载" data-label-en="Download" data-label-current="下载"></button>
-    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit" data-label-zh="发送到编辑" data-label-en="Send to Edit" data-label-current="发送到编辑"></button>
+    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download" data-label-zh="下载" data-label-en="Download"><span class="btn-text">下载</span></button>
+    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit" data-label-zh="发送到编辑" data-label-en="Send to Edit"><span class="btn-text">发送到编辑</span></button>
   </div>
 </div>
 
@@ -623,7 +623,11 @@ function applyI18n(){
     if(el.tagName==='BUTTON'){
       const zh=el.getAttribute('data-label-zh');
       const en=el.getAttribute('data-label-en');
-      if(zh||en) el.setAttribute('data-label-current',lang==='zh'?(zh||txt):(en||txt));
+      if(zh||en){
+        const labelEl=el.querySelector('.btn-text');
+        if(labelEl) labelEl.textContent=lang==='zh'?(zh||txt):(en||txt);
+        else el.textContent=lang==='zh'?(zh||txt):(en||txt);
+      }
       return;
     }
     if(el.tagName==='INPUT' || el.tagName==='TEXTAREA')el.placeholder=txt;
