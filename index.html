@@ -63,6 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 /* ===== Tabs ===== */
 .tabs{display:flex;gap:2px;background:var(--surface3);border-radius:var(--radius-sm);padding:3px;margin-bottom:20px}
 .tab{flex:1;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);border-radius:var(--radius-xs);transition:all var(--transition);font-weight:500;text-align:center}
+.tab-text{display:inline-block;line-height:1.2}
 .tab.active{color:var(--text);background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
 .tab:not(.disabled):hover{color:var(--text)}
 .tab.disabled{opacity:.35;cursor:default;pointer-events:none;font-size:12px}
@@ -269,8 +270,8 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate">生成图片</div>
-      <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit">编辑图片</div>
+      <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate" data-label-zh="生成图片" data-label-en="Generate"><span class="tab-text">生成图片</span></div>
+      <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit" data-label-zh="编辑图片" data-label-en="Edit"><span class="tab-text">编辑图片</span></div>
       <div class="tab" onclick="switchTab('templates')" id="tab-templates">模板</div>
     </div>
 
@@ -625,6 +626,16 @@ function applyI18n(){
       const en=el.getAttribute('data-label-en');
       if(zh||en){
         const labelEl=el.querySelector('.btn-text');
+        if(labelEl) labelEl.textContent=lang==='zh'?(zh||txt):(en||txt);
+        else el.textContent=lang==='zh'?(zh||txt):(en||txt);
+      }
+      return;
+    }
+    if(el.classList?.contains('tab')){
+      const zh=el.getAttribute('data-label-zh');
+      const en=el.getAttribute('data-label-en');
+      if(zh||en){
+        const labelEl=el.querySelector('.tab-text');
         if(labelEl) labelEl.textContent=lang==='zh'?(zh||txt):(en||txt);
         else el.textContent=lang==='zh'?(zh||txt):(en||txt);
       }
