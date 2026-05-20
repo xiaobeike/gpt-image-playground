@@ -35,7 +35,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Robot
 
 /* ===== Buttons ===== */
 .btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;font-weight:500;line-height:1}
-.btn-label{display:inline;line-height:1}
 .btn:hover{border-color:var(--border2);background:var(--surface2)}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(16,163,127,.25)}
@@ -367,7 +366,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn">生成</button>
+      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn" data-label-zh="生成" data-label-en="Generate">生成</button>
     </div>
 
     <!-- ===== Edit Panel ===== -->
@@ -407,13 +406,13 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="form-group">
-        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask">创建蒙版</button>
+        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask" data-label-zh="创建蒙版" data-label-en="Create Mask">创建蒙版</button>
         <div class="mask-container" id="mask-container">
           <div class="mask-toolbar">
             <span style="font-size:12px;color:var(--text2)" data-i18n="brush_size">画笔</span>
             <input type="range" id="brush-size" min="5" max="80" value="25">
-            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear">清除</button>
-            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo">撤销</button>
+            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear" data-label-zh="清除" data-label-en="Clear">清除</button>
+            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo" data-label-zh="撤销" data-label-en="Undo">撤销</button>
           </div>
           <canvas id="mask-canvas" width="512" height="512"></canvas>
         </div>
@@ -484,7 +483,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn">编辑图片</button>
+      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn" data-label-zh="编辑图片" data-label-en="Edit Image">编辑图片</button>
     </div>
 
     <!-- ===== Templates Panel ===== -->
@@ -518,7 +517,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     <div class="history-section" id="history-section" style="display:none">
       <div class="history-header">
         <h3 data-i18n="history">历史记录</h3>
-        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all">清除全部</button>
+        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all" data-label-zh="清除全部" data-label-en="Clear All">清除全部</button>
       </div>
       <div class="history-grid" id="history-grid"></div>
     </div>
@@ -544,9 +543,9 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     </div>
     <div class="test-result" id="test-result"></div>
     <div class="modal-actions">
-      <button class="btn" onclick="hideConfig()" data-i18n="cancel">取消</button>
-      <button class="btn" onclick="testConnection()" data-i18n="test_conn">测试连接</button>
-      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save">保存</button>
+      <button class="btn" onclick="hideConfig()" data-i18n="cancel" data-label-zh="取消" data-label-en="Cancel">取消</button>
+      <button class="btn" onclick="testConnection()" data-i18n="test_conn" data-label-zh="测试连接" data-label-en="Test Connection">测试连接</button>
+      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save" data-label-zh="保存" data-label-en="Save">保存</button>
     </div>
   </div>
 </div>
@@ -556,8 +555,8 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
   <div class="lightbox-close">×</div>
   <img id="lightbox-img" src="" alt="">
   <div class="lightbox-actions">
-    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download">下载</button>
-    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit">发送到编辑</button>
+    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download" data-label-zh="下载" data-label-en="Download">下载</button>
+    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit" data-label-zh="发送到编辑" data-label-en="Send to Edit">发送到编辑</button>
   </div>
 </div>
 
@@ -616,34 +615,18 @@ const i18n = {
   }
 };
 function t(k){return i18n[lang]?.[k]||k}
-function ensureButtonLabels(){
-  document.querySelectorAll('button[data-i18n]').forEach(btn=>{
-    let label=btn.querySelector('.btn-label');
-    if(!label){
-      label=document.createElement('span');
-      label.className='btn-label';
-      label.textContent=(btn.textContent||'').trim();
-      [...btn.childNodes].forEach(n=>{if(n.nodeType===3)n.nodeValue=''});
-      btn.appendChild(label);
-    }
-  });
-}
-function setI18nText(el,text){
-  const txt=String(text??'');
-  const textNode=[...el.childNodes].find(n=>n.nodeType===3&&n.nodeValue.trim().length>0);
-  if(textNode){textNode.nodeValue=txt;return}
-  if(el.childElementCount===0){el.textContent=txt;return}
-  const btnLabel=el.querySelector?.('.btn-label');
-  if(btnLabel){btnLabel.textContent=txt;return}
-  el.setAttribute('aria-label',txt);
-}
 function applyI18n(){
-  ensureButtonLabels();
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k=el.getAttribute('data-i18n');
     const txt=t(k);
+    if(el.tagName==='BUTTON'){
+      const zh=el.getAttribute('data-label-zh');
+      const en=el.getAttribute('data-label-en');
+      if(zh||en) el.textContent=lang==='zh'?(zh||txt):(en||txt);
+      return;
+    }
     if(el.tagName==='INPUT' || el.tagName==='TEXTAREA')el.placeholder=txt;
-    else setI18nText(el,txt);
+    else el.textContent=txt;
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
     el.placeholder=t(el.getAttribute('data-i18n-ph'));
