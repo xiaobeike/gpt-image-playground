@@ -42,9 +42,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','H
   z-index:1;
 }
 .ui-label{
-  display:inline-grid;
-  grid-template-areas:'label';
-  place-items:center start;
+  display:inline-block;
   vertical-align:middle;
   font:inherit !important;
   line-height:inherit !important;
@@ -57,29 +55,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','H
   mask:none !important;
   -webkit-mask:none !important;
   isolation:isolate;
-  contain:paint;
-  -webkit-text-fill-color:transparent !important;
-}
-.ui-label::before{
-  content:attr(data-lock-text);
-  grid-area:label;
-  display:inline-block;
-  color:inherit !important;
-  -webkit-text-fill-color:currentColor !important;
-  opacity:1 !important;
-  visibility:visible !important;
-  filter:none !important;
-  text-shadow:none !important;
-  mix-blend-mode:normal !important;
-  font:inherit !important;
-  line-height:inherit !important;
-  letter-spacing:inherit !important;
-  white-space:inherit !important;
-  text-indent:0 !important;
-  transform:none !important;
-  clip-path:none !important;
-  mask:none !important;
-  -webkit-mask:none !important;
 }
 .header h1,.header h1 *,.header-actions .btn,.header-actions .btn *,.header-actions .icon-btn,.header-actions .icon-btn *,.tab,.tab *,.form-group>label,.toggle-row>span,.result-placeholder,.history-header h3,.modal h2,.modal label,.btn,.btn *,.icon-btn,.icon-btn *{
   -webkit-text-fill-color:currentColor;
@@ -87,6 +62,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','H
 .tab,.btn,.opt-group label,.form-group>label,.toggle-row>span,.history-header h3,.modal-actions button,.lightbox-actions button{
   isolation:isolate;
 }
+.header h1>.ui-label:first-child{color:var(--text) !important;-webkit-text-fill-color:var(--text) !important}
+.header h1>.ui-label:last-child{color:var(--primary) !important;-webkit-text-fill-color:var(--primary) !important}
+#langBtn .ui-label,.header-actions .btn .ui-label,.icon-btn .ui-label{color:var(--text2) !important;-webkit-text-fill-color:var(--text2) !important}
+.tab .ui-label{color:var(--text2) !important;-webkit-text-fill-color:var(--text2) !important}
+.tab.active .ui-label,.tab:hover .ui-label{color:var(--text) !important;-webkit-text-fill-color:var(--text) !important}
+.form-group>label .ui-label,.modal label .ui-label,.history-header .ui-label{color:var(--text2) !important;-webkit-text-fill-color:var(--text2) !important}
+.toggle-row .ui-label{color:var(--text) !important;-webkit-text-fill-color:var(--text) !important}
+.result-placeholder .ui-label,.upload-zone .ui-label,.hint.ui-label{color:var(--text3) !important;-webkit-text-fill-color:var(--text3) !important}
+.btn .ui-label{color:var(--text) !important;-webkit-text-fill-color:var(--text) !important}
+.btn-primary .ui-label{color:#fff !important;-webkit-text-fill-color:#fff !important}
+.btn-danger .ui-label{color:var(--danger) !important;-webkit-text-fill-color:var(--danger) !important}
+.btn-danger:hover .ui-label{color:#fff !important;-webkit-text-fill-color:#fff !important}
+.opt-group label .ui-label{color:var(--text2) !important;-webkit-text-fill-color:var(--text2) !important}
+.opt-group input:checked+span.ui-label,
+.opt-group label:has(input:checked) .ui-label{color:var(--primary) !important;-webkit-text-fill-color:var(--primary) !important}
 .btn svg,.icon-btn svg{stroke:currentColor;fill:none;flex-shrink:0}
 
 /* ===== Header ===== */
@@ -697,7 +687,7 @@ function setElementLabel(el,label){
   const target=getLabelTarget(el);
   if(target){
     target.textContent=label;
-    target.dataset.lockText=label;
+    target.dataset.originalText=label;
     return;
   }
   const textNode=[...el.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());
@@ -709,10 +699,11 @@ function setElementLabel(el,label){
 }
 function syncLockedLabels(root=document){
   root.querySelectorAll?.('.ui-label').forEach(el=>{
-    const locked=(el.dataset.lockText||el.textContent||'').trim();
+    const current=(el.textContent||'').trim();
+    const locked=(el.dataset.originalText||current).trim();
     if(!locked) return;
-    if(el.textContent!==locked) el.textContent=locked;
-    el.dataset.lockText=locked;
+    if(!el.dataset.originalText) el.dataset.originalText=locked;
+    if(current!==locked) el.textContent=locked;
     el.classList.add('notranslate');
     el.setAttribute('translate','no');
   });
