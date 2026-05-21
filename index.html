@@ -41,8 +41,51 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','H
   position:relative;
   z-index:1;
 }
+.ui-label{
+  display:inline-grid;
+  grid-template-areas:'label';
+  place-items:center start;
+  vertical-align:middle;
+  font:inherit !important;
+  line-height:inherit !important;
+  letter-spacing:inherit !important;
+  text-indent:0 !important;
+  white-space:inherit !important;
+  overflow:visible !important;
+  transform:none !important;
+  clip-path:none !important;
+  mask:none !important;
+  -webkit-mask:none !important;
+  isolation:isolate;
+  contain:paint;
+  -webkit-text-fill-color:transparent !important;
+}
+.ui-label::before{
+  content:attr(data-lock-text);
+  grid-area:label;
+  display:inline-block;
+  color:inherit !important;
+  -webkit-text-fill-color:currentColor !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  filter:none !important;
+  text-shadow:none !important;
+  mix-blend-mode:normal !important;
+  font:inherit !important;
+  line-height:inherit !important;
+  letter-spacing:inherit !important;
+  white-space:inherit !important;
+  text-indent:0 !important;
+  transform:none !important;
+  clip-path:none !important;
+  mask:none !important;
+  -webkit-mask:none !important;
+}
 .header h1,.header h1 *,.header-actions .btn,.header-actions .btn *,.header-actions .icon-btn,.header-actions .icon-btn *,.tab,.tab *,.form-group>label,.toggle-row>span,.result-placeholder,.history-header h3,.modal h2,.modal label,.btn,.btn *,.icon-btn,.icon-btn *{
   -webkit-text-fill-color:currentColor;
+}
+.tab,.btn,.opt-group label,.form-group>label,.toggle-row>span,.history-header h3,.modal-actions button,.lightbox-actions button{
+  isolation:isolate;
 }
 .btn svg,.icon-btn svg{stroke:currentColor;fill:none;flex-shrink:0}
 
@@ -654,6 +697,7 @@ function setElementLabel(el,label){
   const target=getLabelTarget(el);
   if(target){
     target.textContent=label;
+    target.dataset.lockText=label;
     return;
   }
   const textNode=[...el.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());
@@ -662,6 +706,43 @@ function setElementLabel(el,label){
     return;
   }
   el.textContent=label;
+}
+function syncLockedLabels(root=document){
+  root.querySelectorAll?.('.ui-label').forEach(el=>{
+    const locked=(el.dataset.lockText||el.textContent||'').trim();
+    if(!locked) return;
+    if(el.textContent!==locked) el.textContent=locked;
+    el.dataset.lockText=locked;
+    el.classList.add('notranslate');
+    el.setAttribute('translate','no');
+  });
+}
+let uiLabelSyncFrame=0;
+function queueLockedLabelSync(){
+  if(uiLabelSyncFrame) return;
+  uiLabelSyncFrame=requestAnimationFrame(()=>{
+    uiLabelSyncFrame=0;
+    syncLockedLabels();
+  });
+}
+function observeUiLabelIntegrity(){
+  if(window.__uiLabelObserver||!document.body) return;
+  const observer=new MutationObserver(mutations=>{
+    const shouldSync=mutations.some(mutation=>{
+      if(mutation.type==='characterData') return true;
+      if(mutation.type==='childList') return true;
+      return mutation.type==='attributes';
+    });
+    if(shouldSync) queueLockedLabelSync();
+  });
+  observer.observe(document.body,{
+    subtree:true,
+    childList:true,
+    characterData:true,
+    attributes:true,
+    attributeFilter:['class','style','translate']
+  });
+  window.__uiLabelObserver=observer;
 }
 function applyI18n(){
   document.documentElement.lang=lang==='zh'?'zh-CN':'en';
@@ -679,12 +760,15 @@ function applyI18n(){
   });
   const langBtn=document.getElementById('langBtn');
   if(langBtn) setElementLabel(langBtn,lang==='zh'?'EN':'中');
+  syncLockedLabels();
 }
 
 // ==================== Init ====================
 function init(){
   if(theme==='dark')document.body.classList.add('dark');
   applyI18n();
+  syncLockedLabels();
+  observeUiLabelIntegrity();
   document.getElementById('cfg-baseurl').value=config.baseUrl||'';
   document.getElementById('cfg-apikey').value=config.apiKey||'';
   setupSizeListeners('gen');
