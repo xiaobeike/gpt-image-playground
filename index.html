@@ -30,6 +30,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','H
 
 /* Keep core UI text/colors stable even when extensions inject page-wide styles. */
 .ui-text,.ui-text *{color:inherit}
+.ui-label,.ui-label *{
+  color:inherit !important;
+  -webkit-text-fill-color:currentColor !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  filter:none !important;
+  text-shadow:none !important;
+  mix-blend-mode:normal !important;
+  position:relative;
+  z-index:1;
+}
 .header h1,.header h1 *,.header-actions .btn,.header-actions .btn *,.header-actions .icon-btn,.header-actions .icon-btn *,.tab,.tab *,.form-group>label,.toggle-row>span,.result-placeholder,.history-header h3,.modal h2,.modal label,.btn,.btn *,.icon-btn,.icon-btn *{
   -webkit-text-fill-color:currentColor;
 }
@@ -258,34 +269,34 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
 <!-- Header -->
 <div class="header" translate="no">
   <div class="header-left ui-text">
-    <h1>GPT Image Playground<span>图片工坊</span></h1>
+    <h1><span class="ui-label notranslate" translate="no">GPT Image Playground</span><span class="ui-label notranslate" translate="no">图片工坊</span></h1>
   </div>
   <div class="header-actions">
-    <button class="icon-btn notranslate" onclick="toggleLang()" id="langBtn" title="Language" translate="no">EN</button>
+    <button class="icon-btn notranslate" onclick="toggleLang()" id="langBtn" title="Language" translate="no"><span class="ui-label notranslate" translate="no">EN</span></button>
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
     <button class="btn btn-sm" onclick="showConfig()" data-i18n="config" data-label-zh="配置接口" data-label-en="API Config">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      配置接口
+      <span class="ui-label notranslate" translate="no">配置接口</span>
     </button>
   </div>
 </div>
 
 <!-- Main -->
-<div class="main" translate="no">
+<div class="main">
   <!-- Sidebar -->
-  <div class="sidebar">
+  <div class="sidebar" translate="no">
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate" data-label-zh="生成图片" data-label-en="Generate">生成图片</div>
-      <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit" data-label-zh="编辑图片" data-label-en="Edit">编辑图片</div>
-      <div class="tab" onclick="switchTab('templates')" id="tab-templates">模板</div>
+      <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate" data-label-zh="生成图片" data-label-en="Generate"><span class="ui-label notranslate" translate="no">生成图片</span></div>
+      <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit" data-label-zh="编辑图片" data-label-en="Edit"><span class="ui-label notranslate" translate="no">编辑图片</span></div>
+      <div class="tab" onclick="switchTab('templates')" id="tab-templates"><span class="ui-label notranslate" translate="no">模板</span></div>
     </div>
 
     <!-- ===== Generate Panel ===== -->
     <div id="panel-generate">
       <div class="form-group">
-        <label data-i18n="model">模型</label>
+        <label data-i18n="model"><span class="ui-label notranslate" translate="no">模型</span></label>
         <select id="gen-model">
           <option value="gpt-image-2">gpt-image-2</option>
           <option value="gpt-image-1">gpt-image-1</option>
@@ -293,16 +304,16 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="toggle-row">
-        <span data-i18n="stream">启用流式预览</span>
+        <span data-i18n="stream" class="ui-label notranslate" translate="no">启用流式预览</span>
         <div class="toggle" id="gen-stream-toggle" onclick="toggleSwitch(this)"></div>
       </div>
       <div class="toggle-row">
-        <span>中文自动翻译</span>
+        <span class="ui-label notranslate" translate="no">中文自动翻译</span>
         <div class="toggle on" id="gen-translate-toggle" onclick="toggleSwitch(this)"></div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="prompt">提示词</label>
+        <label data-i18n="prompt"><span class="ui-label notranslate" translate="no">提示词</span></label>
         <div class="prompt-history-wrap">
           <textarea id="gen-prompt" placeholder="直接输入中文，自动翻译为英文生成更佳效果..." data-i18n-ph="prompt_ph_gen"></textarea>
           <button class="prompt-history-btn" onclick="togglePromptHistory('gen')" title="Prompt History">⏱</button>
@@ -311,7 +322,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="form-group">
-        <label data-i18n="quantity">图片数量</label>
+        <label data-i18n="quantity"><span class="ui-label notranslate" translate="no">图片数量</span></label>
         <div class="num-input">
           <button onclick="changeNum('gen-qty',-1)">−</button>
           <input type="number" id="gen-qty" value="1" min="1" max="10">
@@ -320,13 +331,13 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="form-group">
-        <label data-i18n="size">尺寸</label>
+        <label data-i18n="size"><span class="ui-label notranslate" translate="no">尺寸</span></label>
         <div class="opt-group" id="gen-size-group">
-          <label><input type="radio" name="gen-size" value="auto" checked><span>Auto</span></label>
-          <label><input type="radio" name="gen-size" value="1024x1024"><span>1:1</span></label>
-          <label><input type="radio" name="gen-size" value="1536x1024"><span>3:2</span></label>
-          <label><input type="radio" name="gen-size" value="1024x1536"><span>2:3</span></label>
-          <label><input type="radio" name="gen-size" value="custom"><span data-i18n="custom">自定义</span></label>
+          <label><input type="radio" name="gen-size" value="auto" checked><span class="ui-label notranslate" translate="no">Auto</span></label>
+          <label><input type="radio" name="gen-size" value="1024x1024"><span class="ui-label notranslate" translate="no">1:1</span></label>
+          <label><input type="radio" name="gen-size" value="1536x1024"><span class="ui-label notranslate" translate="no">3:2</span></label>
+          <label><input type="radio" name="gen-size" value="1024x1536"><span class="ui-label notranslate" translate="no">2:3</span></label>
+          <label><input type="radio" name="gen-size" value="custom"><span data-i18n="custom" class="ui-label notranslate" translate="no">自定义</span></label>
         </div>
         <div id="gen-custom-size" style="display:none">
           <div class="custom-size-row">
@@ -340,48 +351,48 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       <div class="section-divider"></div>
 
       <div class="form-group">
-        <label data-i18n="quality">质量</label>
+        <label data-i18n="quality"><span class="ui-label notranslate" translate="no">质量</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="gen-quality" value="auto" checked><span>Auto</span></label>
-          <label><input type="radio" name="gen-quality" value="low"><span>Low (1K)</span></label>
-          <label><input type="radio" name="gen-quality" value="medium"><span>Medium (2K)</span></label>
-          <label><input type="radio" name="gen-quality" value="high"><span>High (4K)</span></label>
+          <label><input type="radio" name="gen-quality" value="auto" checked><span class="ui-label notranslate" translate="no">Auto</span></label>
+          <label><input type="radio" name="gen-quality" value="low"><span class="ui-label notranslate" translate="no">Low (1K)</span></label>
+          <label><input type="radio" name="gen-quality" value="medium"><span class="ui-label notranslate" translate="no">Medium (2K)</span></label>
+          <label><input type="radio" name="gen-quality" value="high"><span class="ui-label notranslate" translate="no">High (4K)</span></label>
         </div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="upscale">本地放大</label>
+        <label data-i18n="upscale"><span class="ui-label notranslate" translate="no">本地放大</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="gen-upscale" value="1" checked><span data-i18n="original">原图</span></label>
-          <label><input type="radio" name="gen-upscale" value="2"><span>2K</span></label>
-          <label><input type="radio" name="gen-upscale" value="4"><span>4K</span></label>
+          <label><input type="radio" name="gen-upscale" value="1" checked><span data-i18n="original" class="ui-label notranslate" translate="no">原图</span></label>
+          <label><input type="radio" name="gen-upscale" value="2"><span class="ui-label notranslate" translate="no">2K</span></label>
+          <label><input type="radio" name="gen-upscale" value="4"><span class="ui-label notranslate" translate="no">4K</span></label>
         </div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="format">输出格式</label>
+        <label data-i18n="format"><span class="ui-label notranslate" translate="no">输出格式</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="gen-format" value="png" checked><span>PNG</span></label>
-          <label><input type="radio" name="gen-format" value="jpeg"><span>JPEG</span></label>
-          <label><input type="radio" name="gen-format" value="webp"><span>WebP</span></label>
+          <label><input type="radio" name="gen-format" value="png" checked><span class="ui-label notranslate" translate="no">PNG</span></label>
+          <label><input type="radio" name="gen-format" value="jpeg"><span class="ui-label notranslate" translate="no">JPEG</span></label>
+          <label><input type="radio" name="gen-format" value="webp"><span class="ui-label notranslate" translate="no">WebP</span></label>
         </div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="moderation">审核级别</label>
+        <label data-i18n="moderation"><span class="ui-label notranslate" translate="no">审核级别</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="gen-moderation" value="auto" checked><span>Auto</span></label>
-          <label><input type="radio" name="gen-moderation" value="low"><span>Low</span></label>
+          <label><input type="radio" name="gen-moderation" value="auto" checked><span class="ui-label notranslate" translate="no">Auto</span></label>
+          <label><input type="radio" name="gen-moderation" value="low"><span class="ui-label notranslate" translate="no">Low</span></label>
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn" data-label-zh="生成" data-label-en="Generate">生成</button>
+      <button class="btn btn-primary generate-btn" onclick="generateImage()" id="gen-btn" data-i18n="generate_btn" data-label-zh="生成" data-label-en="Generate"><span class="ui-label notranslate" translate="no">生成</span></button>
     </div>
 
     <!-- ===== Edit Panel ===== -->
     <div id="panel-edit" style="display:none">
       <div class="form-group">
-        <label data-i18n="model">模型</label>
+        <label data-i18n="model"><span class="ui-label notranslate" translate="no">模型</span></label>
         <select id="edit-model">
           <option value="gpt-image-2">gpt-image-2</option>
           <option value="gpt-image-1">gpt-image-1</option>
@@ -389,15 +400,15 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="toggle-row">
-        <span data-i18n="stream">启用流式预览</span>
+        <span data-i18n="stream" class="ui-label notranslate" translate="no">启用流式预览</span>
         <div class="toggle" id="edit-stream-toggle" onclick="toggleSwitch(this)"></div>
       </div>
       <div class="toggle-row">
-        <span>中文自动翻译</span>
+        <span class="ui-label notranslate" translate="no">中文自动翻译</span>
         <div class="toggle on" id="edit-translate-toggle" onclick="toggleSwitch(this)"></div>
       </div>
       <div class="form-group">
-        <label data-i18n="prompt">提示词</label>
+        <label data-i18n="prompt"><span class="ui-label notranslate" translate="no">提示词</span></label>
         <div class="prompt-history-wrap">
           <textarea id="edit-prompt" placeholder="直接输入中文，自动翻译为英文生成更佳效果..." data-i18n-ph="prompt_ph_edit"></textarea>
           <button class="prompt-history-btn" onclick="togglePromptHistory('edit')" title="Prompt History">⏱</button>
@@ -406,22 +417,22 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="form-group">
-        <label data-i18n="source_image">源图片 <span class="hint">(最多10张)</span></label>
+        <label data-i18n="source_image"><span class="ui-label notranslate" translate="no">源图片</span> <span class="hint notranslate" translate="no">(最多10张)</span></label>
         <div class="upload-zone" id="upload-zone">
           <input type="file" accept="image/*" multiple id="file-input" onchange="handleUpload(event)">
-          <p data-i18n="upload_hint">点击或拖拽上传图片</p>
+          <p data-i18n="upload_hint"><span class="ui-label notranslate" translate="no">点击或拖拽上传图片</span></p>
         </div>
         <div class="upload-preview" id="upload-preview"></div>
       </div>
 
       <div class="form-group">
-        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask" data-label-zh="创建蒙版" data-label-en="Create Mask">创建蒙版</button>
+        <button class="btn btn-sm" onclick="toggleMask()" id="mask-toggle-btn" data-i18n="create_mask" data-label-zh="创建蒙版" data-label-en="Create Mask"><span class="ui-label notranslate" translate="no">创建蒙版</span></button>
         <div class="mask-container" id="mask-container">
           <div class="mask-toolbar">
-            <span style="font-size:12px;color:var(--text2)" data-i18n="brush_size">画笔</span>
+            <span style="font-size:12px;color:var(--text2)" data-i18n="brush_size" class="ui-label notranslate" translate="no">画笔</span>
             <input type="range" id="brush-size" min="5" max="80" value="25">
-            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear" data-label-zh="清除" data-label-en="Clear">清除</button>
-            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo" data-label-zh="撤销" data-label-en="Undo">撤销</button>
+            <button class="btn btn-sm" onclick="clearMask()" data-i18n="clear" data-label-zh="清除" data-label-en="Clear"><span class="ui-label notranslate" translate="no">清除</span></button>
+            <button class="btn btn-sm" onclick="undoMask()" data-i18n="undo" data-label-zh="撤销" data-label-en="Undo"><span class="ui-label notranslate" translate="no">撤销</span></button>
           </div>
           <canvas id="mask-canvas" width="512" height="512"></canvas>
         </div>
@@ -430,13 +441,13 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       <div class="section-divider"></div>
 
       <div class="form-group">
-        <label data-i18n="size">尺寸</label>
+        <label data-i18n="size"><span class="ui-label notranslate" translate="no">尺寸</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="edit-size" value="auto" checked><span>Auto</span></label>
-          <label><input type="radio" name="edit-size" value="1024x1024"><span>1:1</span></label>
-          <label><input type="radio" name="edit-size" value="1536x1024"><span>3:2</span></label>
-          <label><input type="radio" name="edit-size" value="1024x1536"><span>2:3</span></label>
-          <label><input type="radio" name="edit-size" value="custom"><span data-i18n="custom">自定义</span></label>
+          <label><input type="radio" name="edit-size" value="auto" checked><span class="ui-label notranslate" translate="no">Auto</span></label>
+          <label><input type="radio" name="edit-size" value="1024x1024"><span class="ui-label notranslate" translate="no">1:1</span></label>
+          <label><input type="radio" name="edit-size" value="1536x1024"><span class="ui-label notranslate" translate="no">3:2</span></label>
+          <label><input type="radio" name="edit-size" value="1024x1536"><span class="ui-label notranslate" translate="no">2:3</span></label>
+          <label><input type="radio" name="edit-size" value="custom"><span data-i18n="custom" class="ui-label notranslate" translate="no">自定义</span></label>
         </div>
         <div id="edit-custom-size" style="display:none">
           <div class="custom-size-row">
@@ -448,43 +459,43 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       </div>
 
       <div class="form-group">
-        <label data-i18n="quality">质量</label>
+        <label data-i18n="quality"><span class="ui-label notranslate" translate="no">质量</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="edit-quality" value="auto" checked><span>Auto</span></label>
-          <label><input type="radio" name="edit-quality" value="low"><span>Low</span></label>
-          <label><input type="radio" name="edit-quality" value="medium"><span>Medium</span></label>
-          <label><input type="radio" name="edit-quality" value="high"><span>High</span></label>
+          <label><input type="radio" name="edit-quality" value="auto" checked><span class="ui-label notranslate" translate="no">Auto</span></label>
+          <label><input type="radio" name="edit-quality" value="low"><span class="ui-label notranslate" translate="no">Low</span></label>
+          <label><input type="radio" name="edit-quality" value="medium"><span class="ui-label notranslate" translate="no">Medium</span></label>
+          <label><input type="radio" name="edit-quality" value="high"><span class="ui-label notranslate" translate="no">High</span></label>
         </div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="upscale">本地放大</label>
+        <label data-i18n="upscale"><span class="ui-label notranslate" translate="no">本地放大</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="edit-upscale" value="1" checked><span data-i18n="original">原图</span></label>
-          <label><input type="radio" name="edit-upscale" value="2"><span>2K</span></label>
-          <label><input type="radio" name="edit-upscale" value="4"><span>4K</span></label>
+          <label><input type="radio" name="edit-upscale" value="1" checked><span data-i18n="original" class="ui-label notranslate" translate="no">原图</span></label>
+          <label><input type="radio" name="edit-upscale" value="2"><span class="ui-label notranslate" translate="no">2K</span></label>
+          <label><input type="radio" name="edit-upscale" value="4"><span class="ui-label notranslate" translate="no">4K</span></label>
         </div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="format">输出格式</label>
+        <label data-i18n="format"><span class="ui-label notranslate" translate="no">输出格式</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="edit-format" value="png" checked><span>PNG</span></label>
-          <label><input type="radio" name="edit-format" value="jpeg"><span>JPEG</span></label>
-          <label><input type="radio" name="edit-format" value="webp"><span>WebP</span></label>
+          <label><input type="radio" name="edit-format" value="png" checked><span class="ui-label notranslate" translate="no">PNG</span></label>
+          <label><input type="radio" name="edit-format" value="jpeg"><span class="ui-label notranslate" translate="no">JPEG</span></label>
+          <label><input type="radio" name="edit-format" value="webp"><span class="ui-label notranslate" translate="no">WebP</span></label>
         </div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="moderation">审核级别</label>
+        <label data-i18n="moderation"><span class="ui-label notranslate" translate="no">审核级别</span></label>
         <div class="opt-group">
-          <label><input type="radio" name="edit-moderation" value="auto" checked><span>Auto</span></label>
-          <label><input type="radio" name="edit-moderation" value="low"><span>Low</span></label>
+          <label><input type="radio" name="edit-moderation" value="auto" checked><span class="ui-label notranslate" translate="no">Auto</span></label>
+          <label><input type="radio" name="edit-moderation" value="low"><span class="ui-label notranslate" translate="no">Low</span></label>
         </div>
       </div>
 
       <div class="form-group">
-        <label data-i18n="quantity">图片数量</label>
+        <label data-i18n="quantity"><span class="ui-label notranslate" translate="no">图片数量</span></label>
         <div class="num-input">
           <button onclick="changeNum('edit-qty',-1)">−</button>
           <input type="number" id="edit-qty" value="1" min="1" max="10">
@@ -492,13 +503,13 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
         </div>
       </div>
 
-      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn" data-label-zh="编辑图片" data-label-en="Edit Image">编辑图片</button>
+      <button class="btn btn-primary generate-btn" onclick="editImage()" id="edit-btn" data-i18n="edit_btn" data-label-zh="编辑图片" data-label-en="Edit Image"><span class="ui-label notranslate" translate="no">编辑图片</span></button>
     </div>
 
     <!-- ===== Templates Panel ===== -->
     <div id="panel-templates" style="display:none">
       <div class="form-group">
-        <label>分类</label>
+        <label><span class="ui-label notranslate" translate="no">分类</span></label>
         <select id="tpl-category" onchange="renderTemplates()"></select>
       </div>
       <div id="tpl-list"></div>
@@ -510,7 +521,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     <div class="result-area">
       <div class="result-placeholder" id="placeholder">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <span data-i18n="no_result">生成的图片将显示在这里</span>
+        <span data-i18n="no_result" class="ui-label notranslate" translate="no">生成的图片将显示在这里</span>
       </div>
       <div class="stream-preview" id="stream-preview">
         <img id="stream-img" src="" alt="">
@@ -518,15 +529,15 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       <div class="progress-bar" id="progress-bar" style="display:none"><div class="fill" id="progress-fill"></div></div>
       <div class="loading" id="loading">
         <div class="spinner"></div>
-        <div class="loading-text" id="loading-text" data-i18n="generating">正在生成...</div>
+        <div class="loading-text ui-label notranslate" id="loading-text" data-i18n="generating" translate="no">正在生成...</div>
       </div>
       <div class="result-images" id="result-images"></div>
     </div>
 
     <div class="history-section" id="history-section" style="display:none">
-      <div class="history-header">
-        <h3 data-i18n="history">历史记录</h3>
-        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all" data-label-zh="清除全部" data-label-en="Clear All">清除全部</button>
+      <div class="history-header" translate="no">
+        <h3 data-i18n="history" class="ui-label notranslate" translate="no">历史记录</h3>
+        <button class="btn btn-sm btn-danger" onclick="clearHistory()" data-i18n="clear_all" data-label-zh="清除全部" data-label-en="Clear All"><span class="ui-label notranslate" translate="no">清除全部</span></button>
       </div>
       <div class="history-grid" id="history-grid"></div>
     </div>
@@ -534,38 +545,38 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
 </div>
 
 <!-- Config Modal -->
-<div class="modal-overlay" id="config-modal">
+<div class="modal-overlay" id="config-modal" translate="no">
   <div class="modal">
-    <h2 data-i18n="api_config">接口配置</h2>
+    <h2 data-i18n="api_config" class="ui-label notranslate" translate="no">接口配置</h2>
     <div class="preset-row">
       <select id="cfg-preset-select" onchange="loadPreset()"><option value="">-- 选择预设 --</option></select>
       <button class="preset-btn" onclick="savePreset()" title="保存预设">💾</button>
       <button class="preset-btn danger" onclick="deletePreset()" title="删除预设">🗑</button>
     </div>
     <div class="form-group">
-      <label>Base URL</label>
+      <label class="notranslate" translate="no">Base URL</label>
       <input type="url" id="cfg-baseurl" placeholder="https://api.openai.com/v1">
     </div>
     <div class="form-group">
-      <label>API Key</label>
+      <label class="notranslate" translate="no">API Key</label>
       <input type="password" id="cfg-apikey" placeholder="sk-...">
     </div>
     <div class="test-result" id="test-result"></div>
     <div class="modal-actions">
-      <button class="btn" onclick="hideConfig()" data-i18n="cancel" data-label-zh="取消" data-label-en="Cancel">取消</button>
-      <button class="btn" onclick="testConnection()" data-i18n="test_conn" data-label-zh="测试连接" data-label-en="Test Connection">测试连接</button>
-      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save" data-label-zh="保存" data-label-en="Save">保存</button>
+      <button class="btn" onclick="hideConfig()" data-i18n="cancel" data-label-zh="取消" data-label-en="Cancel"><span class="ui-label notranslate" translate="no">取消</span></button>
+      <button class="btn" onclick="testConnection()" data-i18n="test_conn" data-label-zh="测试连接" data-label-en="Test Connection"><span class="ui-label notranslate" translate="no">测试连接</span></button>
+      <button class="btn btn-primary" onclick="saveConfig()" data-i18n="save" data-label-zh="保存" data-label-en="Save"><span class="ui-label notranslate" translate="no">保存</span></button>
     </div>
   </div>
 </div>
 
 <!-- Lightbox -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+<div class="lightbox" id="lightbox" onclick="closeLightbox()" translate="no">
   <div class="lightbox-close">×</div>
   <img id="lightbox-img" src="" alt="">
   <div class="lightbox-actions">
-    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download" data-label-zh="下载" data-label-en="Download">下载</button>
-    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit" data-label-zh="发送到编辑" data-label-en="Send to Edit">发送到编辑</button>
+    <button class="btn" onclick="event.stopPropagation();downloadLightboxImage()" data-i18n="download" data-label-zh="下载" data-label-en="Download"><span class="ui-label notranslate" translate="no">下载</span></button>
+    <button class="btn" onclick="event.stopPropagation();sendLightboxToEdit()" data-i18n="send_edit" data-label-zh="发送到编辑" data-label-en="Send to Edit"><span class="ui-label notranslate" translate="no">发送到编辑</span></button>
   </div>
 </div>
 
@@ -634,24 +645,30 @@ const i18n = {
   }
 };
 function t(k){return i18n[lang]?.[k]||k}
+function getLabelTarget(el){
+  if(!el) return null;
+  if(el.classList?.contains('ui-label')) return el;
+  return el.querySelector(':scope > .ui-label');
+}
 function setElementLabel(el,label){
+  const target=getLabelTarget(el);
+  if(target){
+    target.textContent=label;
+    return;
+  }
   const textNode=[...el.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());
   if(textNode){
     textNode.textContent=label;
     return;
   }
-  el.appendChild(document.createTextNode(label));
+  el.textContent=label;
 }
 function applyI18n(){
   document.documentElement.lang=lang==='zh'?'zh-CN':'en';
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key=el.dataset.i18n;
     const label=t(key);
-    if(el.dataset.labelZh||el.dataset.labelEn){
-      setElementLabel(el,label);
-    }else{
-      el.textContent=label;
-    }
+    setElementLabel(el,label);
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
     const key=el.dataset.i18nPh;
@@ -661,7 +678,7 @@ function applyI18n(){
     setElementLabel(el,lang==='zh'?el.dataset.labelZh:el.dataset.labelEn);
   });
   const langBtn=document.getElementById('langBtn');
-  if(langBtn) langBtn.textContent=lang==='zh'?'EN':'中';
+  if(langBtn) setElementLabel(langBtn,lang==='zh'?'EN':'中');
 }
 
 // ==================== Init ====================
@@ -1230,8 +1247,8 @@ function makeResultCard(imgSrc,fmt,info){
     <img src="${imgSrc}" onclick="openLightbox(this.src)" loading="lazy">
     ${badges}
     <div class="actions">
-      <button class="btn btn-sm" onclick="downloadResultImage(this.closest('.result-card').querySelector('img').src,'${fmt}')">下载</button>
-      <button class="btn btn-sm" onclick="sendToEdit(this)">发送到编辑</button>
+      <button class="btn btn-sm notranslate" translate="no" onclick="downloadResultImage(this.closest('.result-card').querySelector('img').src,'${fmt}')"><span class="ui-label notranslate" translate="no">下载</span></button>
+      <button class="btn btn-sm notranslate" translate="no" onclick="sendToEdit(this)"><span class="ui-label notranslate" translate="no">发送到编辑</span></button>
     </div>
   </div>`;
 }
@@ -1477,10 +1494,10 @@ function renderTemplates(){
   const items=TEMPLATES.filter(t=>t.cat===cat);
   list.innerHTML=items.map((t,i)=>{
     const idx=TEMPLATES.indexOf(t);
-    return `<div class="tpl-card" onclick="useTemplate(${idx})">
-      <h4>${t.name}</h4>
-      <p>${t.desc}</p>
-      <div class="tpl-tags">${t.tags.map(tag=>`<span class="tpl-tag">${tag}</span>`).join('')}</div>
+    return `<div class="tpl-card notranslate" translate="no" onclick="useTemplate(${idx})">
+      <h4 class="ui-label notranslate" translate="no">${t.name}</h4>
+      <p class="ui-label notranslate" translate="no">${t.desc}</p>
+      <div class="tpl-tags">${t.tags.map(tag=>`<span class="tpl-tag notranslate" translate="no">${tag}</span>`).join('')}</div>
     </div>`;
   }).join('');
 }
