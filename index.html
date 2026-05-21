@@ -6,6 +6,7 @@
 <title>GPT Image Playground</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+html{color-scheme:light}
 :root{
   --bg:#f5f5f7;--surface:#fff;--surface2:#fafafa;--surface3:#f0f0f2;
   --border:#e0e0e3;--border2:#d1d1d6;--text:#1d1d1f;--text2:#86868b;--text3:#aeaeb2;
@@ -25,6 +26,14 @@
   --shadow-lg:0 4px 24px rgba(0,0,0,.4);
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--transition),color var(--transition);overflow:hidden;-webkit-font-smoothing:antialiased}
+.dark{color-scheme:dark}
+
+/* Keep core UI text/colors stable even when extensions inject page-wide styles. */
+.ui-text,.ui-text *{color:inherit}
+.header h1,.header h1 *,.header-actions .btn,.header-actions .btn *,.header-actions .icon-btn,.header-actions .icon-btn *,.tab,.tab *,.form-group>label,.toggle-row>span,.result-placeholder,.history-header h3,.modal h2,.modal label,.btn,.btn *,.icon-btn,.icon-btn *{
+  -webkit-text-fill-color:currentColor;
+}
+.btn svg,.icon-btn svg{stroke:currentColor;fill:none;flex-shrink:0}
 
 /* ===== Header ===== */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
@@ -247,12 +256,12 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
 <body>
 
 <!-- Header -->
-<div class="header">
-  <div class="header-left">
+<div class="header" translate="no">
+  <div class="header-left ui-text">
     <h1>GPT Image Playground<span>图片工坊</span></h1>
   </div>
   <div class="header-actions">
-    <button class="icon-btn" id="langBtn" title="Language" style="display:none">EN</button>
+    <button class="icon-btn notranslate" onclick="toggleLang()" id="langBtn" title="Language" translate="no">EN</button>
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
@@ -264,7 +273,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
 </div>
 
 <!-- Main -->
-<div class="main">
+<div class="main" translate="no">
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="tabs">
@@ -565,7 +574,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
 
 <script>
 // ==================== State ====================
-let lang = 'zh';
+let lang = localStorage.getItem('gpt-img-lang') || 'zh';
 let theme = localStorage.getItem('gpt-img-theme') || 'light';
 function safeParseJSON(key,fallback){
   try{
@@ -625,11 +634,40 @@ const i18n = {
   }
 };
 function t(k){return i18n[lang]?.[k]||k}
-function applyI18n(){}
+function setElementLabel(el,label){
+  const textNode=[...el.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());
+  if(textNode){
+    textNode.textContent=label;
+    return;
+  }
+  el.appendChild(document.createTextNode(label));
+}
+function applyI18n(){
+  document.documentElement.lang=lang==='zh'?'zh-CN':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.dataset.i18n;
+    const label=t(key);
+    if(el.dataset.labelZh||el.dataset.labelEn){
+      setElementLabel(el,label);
+    }else{
+      el.textContent=label;
+    }
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key=el.dataset.i18nPh;
+    el.placeholder=t(key);
+  });
+  document.querySelectorAll('[data-label-zh][data-label-en]').forEach(el=>{
+    setElementLabel(el,lang==='zh'?el.dataset.labelZh:el.dataset.labelEn);
+  });
+  const langBtn=document.getElementById('langBtn');
+  if(langBtn) langBtn.textContent=lang==='zh'?'EN':'中';
+}
 
 // ==================== Init ====================
 function init(){
   if(theme==='dark')document.body.classList.add('dark');
+  applyI18n();
   document.getElementById('cfg-baseurl').value=config.baseUrl||'';
   document.getElementById('cfg-apikey').value=config.apiKey||'';
   setupSizeListeners('gen');
@@ -667,7 +705,11 @@ function toggleTheme(){
 }
 
 // ==================== Language ====================
-function toggleLang(){}
+function toggleLang(){
+  lang=lang==='zh'?'en':'zh';
+  localStorage.setItem('gpt-img-lang',lang);
+  applyI18n();
+}
 
 // ==================== Tabs ====================
 function switchTab(tab){
