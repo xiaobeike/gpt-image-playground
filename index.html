@@ -323,7 +323,7 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
     <div class="tabs">
       <div class="tab active" onclick="switchTab('generate')" id="tab-generate" data-i18n="generate" data-label-zh="生成图片" data-label-en="Generate"><span class="ui-label notranslate" translate="no">生成图片</span></div>
       <div class="tab" onclick="switchTab('edit')" id="tab-edit" data-i18n="edit" data-label-zh="编辑图片" data-label-en="Edit"><span class="ui-label notranslate" translate="no">编辑图片</span></div>
-      <div class="tab" onclick="switchTab('templates')" id="tab-templates"><span class="ui-label notranslate" translate="no">模板</span></div>
+      <div class="tab" onclick="switchTab('templates')" id="tab-templates" data-i18n="templates" data-label-zh="模板" data-label-en="Templates"><span class="ui-label notranslate" translate="no">模板</span></div>
     </div>
 
     <!-- ===== Generate Panel ===== -->
@@ -641,7 +641,7 @@ let maskHistory = [];
 // ==================== i18n ====================
 const i18n = {
   zh: {
-    config:'配置接口', generate:'生成图片', edit:'编辑图片', model:'模型',
+    config:'配置接口', generate:'生成图片', edit:'编辑图片', templates:'模板', model:'模型',
     stream:'启用流式预览', prompt:'提示词', quantity:'图片数量', size:'尺寸',
     custom:'自定义', quality:'质量', upscale:'本地放大', original:'原图',
     format:'输出格式', moderation:'审核级别', generate_btn:'生成', edit_btn:'编辑图片',
@@ -659,7 +659,7 @@ const i18n = {
     test_conn:'测试连接',
   },
   en: {
-    config:'API Config', generate:'Generate', edit:'Edit', model:'Model',
+    config:'API Config', generate:'Generate', edit:'Edit', templates:'Templates', model:'Model',
     stream:'Streaming Preview', prompt:'Prompt', quantity:'Quantity', size:'Size',
     custom:'Custom', quality:'Quality', upscale:'Local Upscale', original:'Original',
     format:'Format', moderation:'Moderation', generate_btn:'Generate', edit_btn:'Edit Image',
@@ -709,11 +709,27 @@ function syncLockedLabels(root=document){
   });
 }
 let uiLabelSyncFrame=0;
+let uiRecoveryTimers=[];
 function queueLockedLabelSync(){
   if(uiLabelSyncFrame) return;
   uiLabelSyncFrame=requestAnimationFrame(()=>{
     uiLabelSyncFrame=0;
     syncLockedLabels();
+  });
+}
+function clearUiRecoveryTimers(){
+  uiRecoveryTimers.forEach(id=>clearTimeout(id));
+  uiRecoveryTimers=[];
+}
+function recoverUiText(){
+  applyI18n();
+  syncLockedLabels();
+}
+function scheduleUiRecovery(){
+  clearUiRecoveryTimers();
+  [0,80,240,700,1500,3000].forEach(delay=>{
+    const id=setTimeout(()=>recoverUiText(),delay);
+    uiRecoveryTimers.push(id);
   });
 }
 function observeUiLabelIntegrity(){
@@ -757,8 +773,7 @@ function applyI18n(){
 // ==================== Init ====================
 function init(){
   if(theme==='dark')document.body.classList.add('dark');
-  applyI18n();
-  syncLockedLabels();
+  recoverUiText();
   observeUiLabelIntegrity();
   document.getElementById('cfg-baseurl').value=config.baseUrl||'';
   document.getElementById('cfg-apikey').value=config.apiKey||'';
@@ -769,6 +784,7 @@ function init(){
   loadHistoryFromStorage();
   renderHistory();
   initTemplates();
+  scheduleUiRecovery();
   if(!config.baseUrl||!config.apiKey){
     setTimeout(()=>showConfig(),400);
   }
@@ -800,7 +816,7 @@ function toggleTheme(){
 function toggleLang(){
   lang=lang==='zh'?'en':'zh';
   localStorage.setItem('gpt-img-lang',lang);
-  applyI18n();
+  scheduleUiRecovery();
 }
 
 // ==================== Tabs ====================
@@ -1708,6 +1724,11 @@ document.addEventListener('keydown',e=>{
     if(currentTab==='generate')generateImage();
     else editImage();
   }
+});
+window.addEventListener('load',scheduleUiRecovery);
+window.addEventListener('pageshow',scheduleUiRecovery);
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden) scheduleUiRecovery();
 });
 
 // ==================== Boot ====================
