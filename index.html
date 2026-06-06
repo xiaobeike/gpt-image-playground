@@ -586,6 +586,11 @@ select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(-
       <button class="preset-btn" onclick="savePreset()" title="保存预设">💾</button>
       <button class="preset-btn danger" onclick="deletePreset()" title="删除预设">🗑</button>
     </div>
+    <div class="preset-row">
+      <button class="btn btn-sm" onclick="exportConfig()" data-i18n="export_config" data-label-zh="导出配置" data-label-en="Export Config"><span class="ui-label notranslate" translate="no">导出配置</span></button>
+      <button class="btn btn-sm" onclick="importConfig()" data-i18n="import_config" data-label-zh="导入配置" data-label-en="Import Config"><span class="ui-label notranslate" translate="no">导入配置</span></button>
+      <input type="file" id="cfg-import-file" accept=".json" style="display:none" onchange="handleImportConfig(event)">
+    </div>
     <div class="form-group">
       <label class="notranslate" translate="no">Base URL</label>
       <input type="url" id="cfg-baseurl" placeholder="https://api.openai.com/v1">
@@ -657,6 +662,8 @@ const i18n = {
     enter_prompt:'请输入提示词', upload_image:'请上传源图片',
     stream_complete:'流式预览完成', no_images:'暂无历史记录',
     test_conn:'测试连接',
+    export_config:'导出配置', import_config:'导入配置',
+    config_exported:'配置已导出', config_imported:'配置已导入', config_import_fail:'导入失败，请检查文件格式',
   },
   en: {
     config:'API Config', generate:'Generate', edit:'Edit', templates:'Templates', model:'Model',
@@ -675,6 +682,8 @@ const i18n = {
     enter_prompt:'Please enter a prompt', upload_image:'Please upload a source image',
     stream_complete:'Stream preview complete', no_images:'No history yet',
     test_conn:'Test Connection',
+    export_config:'Export Config', import_config:'Import Config',
+    config_exported:'Config exported', config_imported:'Config imported', config_import_fail:'Import failed, please check file format',
   }
 };
 function t(k){return i18n[lang]?.[k]||k}
@@ -1644,6 +1653,41 @@ function deletePreset(){
   sel.value='';
   renderPresetDropdown();
   showToast('预设已删除','success');
+}
+
+// ==================== Import / Export Config ====================
+function exportConfig(){
+  const baseUrl=document.getElementById('cfg-baseurl').value.trim();
+  const apiKey=document.getElementById('cfg-apikey').value.trim();
+  if(!baseUrl&&!apiKey){showToast(t('no_config'),'error');return}
+  const data=JSON.stringify({baseUrl,apiKey},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='gpt-image-config.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(t('config_exported'),'success');
+}
+function importConfig(){
+  document.getElementById('cfg-import-file').click();
+}
+function handleImportConfig(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(data.baseUrl!=null) document.getElementById('cfg-baseurl').value=data.baseUrl;
+      if(data.apiKey!=null) document.getElementById('cfg-apikey').value=data.apiKey;
+      showToast(t('config_imported'),'success');
+    }catch(err){
+      showToast(t('config_import_fail'),'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
 }
 
 // ==================== Test Connection ====================
