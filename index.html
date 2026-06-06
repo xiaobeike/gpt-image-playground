@@ -662,7 +662,7 @@ const i18n = {
     enter_prompt:'请输入提示词', upload_image:'请上传源图片',
     stream_complete:'流式预览完成', no_images:'暂无历史记录',
     test_conn:'测试连接',
-    export_config:'导出配置', import_config:'导入配置',
+    export_config:'导出全部配置', import_config:'导入全部配置',
     config_exported:'配置已导出', config_imported:'配置已导入', config_import_fail:'导入失败，请检查文件格式',
   },
   en: {
@@ -682,7 +682,7 @@ const i18n = {
     enter_prompt:'Please enter a prompt', upload_image:'Please upload a source image',
     stream_complete:'Stream preview complete', no_images:'No history yet',
     test_conn:'Test Connection',
-    export_config:'Export Config', import_config:'Import Config',
+    export_config:'Export All', import_config:'Import All',
     config_exported:'Config exported', config_imported:'Config imported', config_import_fail:'Import failed, please check file format',
   }
 };
@@ -1657,11 +1657,11 @@ function deletePreset(){
 
 // ==================== Import / Export Config ====================
 function exportConfig(){
-  const baseUrl=document.getElementById('cfg-baseurl').value.trim();
-  const apiKey=document.getElementById('cfg-apikey').value.trim();
-  if(!baseUrl&&!apiKey){showToast(t('no_config'),'error');return}
-  const data=JSON.stringify({baseUrl,apiKey},null,2);
-  const blob=new Blob([data],{type:'application/json'});
+  const data={
+    config:{baseUrl:config.baseUrl||'',apiKey:config.apiKey||''},
+    presets:getPresets()
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='gpt-image-config.json';
@@ -1679,8 +1679,17 @@ function handleImportConfig(e){
   reader.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);
-      if(data.baseUrl!=null) document.getElementById('cfg-baseurl').value=data.baseUrl;
-      if(data.apiKey!=null) document.getElementById('cfg-apikey').value=data.apiKey;
+      if(data.config){
+        if(data.config.baseUrl!=null) config.baseUrl=data.config.baseUrl;
+        if(data.config.apiKey!=null) config.apiKey=data.config.apiKey;
+        localStorage.setItem('gpt-img-config',JSON.stringify(config));
+      }
+      if(Array.isArray(data.presets)){
+        savePresetsToStorage(data.presets);
+      }
+      document.getElementById('cfg-baseurl').value=config.baseUrl||'';
+      document.getElementById('cfg-apikey').value=config.apiKey||'';
+      renderPresetDropdown();
       showToast(t('config_imported'),'success');
     }catch(err){
       showToast(t('config_import_fail'),'error');
