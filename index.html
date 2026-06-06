@@ -855,6 +855,7 @@ function showConfig(){
   document.getElementById('cfg-apikey').value=config.apiKey||'';
   document.getElementById('test-result').className='test-result';
   renderPresetDropdown();
+  matchCurrentPreset();
   document.getElementById('config-modal').classList.add('show');
 }
 function hideConfig(){document.getElementById('config-modal').classList.remove('show')}
@@ -1621,6 +1622,20 @@ function renderPresetDropdown(){
   sel.innerHTML='<option value="">-- 选择预设 --</option>'+
     presets.map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');
 }
+function matchCurrentPreset(){
+  const baseUrl=(document.getElementById('cfg-baseurl').value||'').trim().replace(/\/+$/,'');
+  const apiKey=(document.getElementById('cfg-apikey').value||'').trim();
+  const presets=getPresets();
+  const sel=document.getElementById('cfg-preset-select');
+  sel.value='';
+  for(let i=0;i<presets.length;i++){
+    if((presets[i].baseUrl||'').trim().replace(/\/+$/,'')===baseUrl&&(presets[i].apiKey||'').trim()===apiKey){
+      sel.value=String(i);break;
+    }
+  }
+}
+document.getElementById('cfg-baseurl').addEventListener('input',matchCurrentPreset);
+document.getElementById('cfg-apikey').addEventListener('input',matchCurrentPreset);
 function loadPreset(){
   const sel=document.getElementById('cfg-preset-select');
   const idx=parseInt(sel.value);
